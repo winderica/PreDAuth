@@ -749,7 +749,7 @@ logform@^2.1.1:
     ms "^2.1.1"
     triple-beam "^1.3.0"
 
-"mcl@file:../lib/mcl":
+"mcl@file:../../lib/mcl":
   version "1.0.0"
 
 mimic-fn@^2.1.0:

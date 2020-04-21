@@ -1,10 +1,10 @@
 {
-  "name": "chaincode",
+  "name": "fabric-chaincode",
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
     "fabric-contract-api": "^2.1.0",
-    "mcl": "file:../lib/mcl"
+    "mcl": "file:../../lib/mcl"
   },
   "devDependencies": {
     "@types/node": "^13.13.0",
