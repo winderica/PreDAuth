@@ -1,9 +1,10 @@
 {
-  "name": "mcl",
+  "name": "fabric-frontend",
   "version": "1.0.0",
+  "license": "MIT",
   "dependencies": {
     "crypto-js": "^4.0.0",
-    "mcl": "file:../lib/mcl"
+    "mcl": "file:../../lib/mcl"
   },
   "devDependencies": {
     "exports-loader": "^0.7.0",
