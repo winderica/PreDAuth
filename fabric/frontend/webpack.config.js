@@ -1,8 +1,8 @@
 const path = require('path');
 
 module.exports = {
-    entry: './src/index.js',
-    mode: "development",
+    entry: './src/index.jsx',
+    mode: 'development',
     output: {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'dist'),
@@ -28,11 +28,16 @@ module.exports = {
                 options: {
                     publicPath: "dist/"
                 }
-            }
+            },
+            {
+                test: /\.([jt])sx?$/,
+                use: ['babel-loader'],
+                exclude: /node_modules/
+            },
         ]
     },
     resolve: {
-        extensions: [ '.js' ],
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
     },
     watchOptions: {
         poll: true
