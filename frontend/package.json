@@ -1,0 +1,17 @@
+{
+  "name": "mcl",
+  "version": "1.0.0",
+  "dependencies": {
+    "crypto-js": "^4.0.0",
+    "mcl": "file:../lib/mcl"
+  },
+  "devDependencies": {
+    "exports-loader": "^0.7.0",
+    "file-loader": "^6.0.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "scripts": {
+    "build": "webpack --watch"
+  }
+}
