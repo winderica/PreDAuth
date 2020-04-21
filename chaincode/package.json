@@ -4,7 +4,7 @@
   "license": "MIT",
   "dependencies": {
     "fabric-contract-api": "^2.1.0",
-    "mcl-wasm": "^0.3.7"
+    "mcl": "file:../lib/mcl"
   },
   "devDependencies": {
     "@types/node": "^13.13.0",

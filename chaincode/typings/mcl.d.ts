@@ -1,36 +1,74 @@
-// incomplete typing for mcl-wasm
+// incomplete typing for mcl
 
-declare module 'mcl-wasm' {
+declare module 'mcl' {
+
     namespace mcl {
-        export function init(curve: number): Promise<{}>;
 
-        export function deserializeHexStrToG1(str: string): G1;
+        export interface Common {
 
-        export function deserializeHexStrToG2(str: string): G2;
+            serializeToHexStr(): string;
+        }
 
-        export function deserializeHexStrToFr(str: string): Fr;
+        export interface G1 extends Common {
+            serialize(): string;
+        }
 
-        export function deserializeHexStrToGT(str: string): GT;
+        export interface G2 extends Common {
+            serialize(): string;
+        }
 
-        export function hashAndMapToG1(str: string): G1;
+        export interface Fr extends Common {
+            // eslint-disable-next-line @typescript-eslint/no-misused-new
+            new(): Fr;
 
-        export function hashAndMapToG2(str: string): G2;
+            serialize(): string;
 
-        export function hashToFr(str: string): Fr;
+            setByCSPRNG(): void;
+        }
 
-        export function pairing(g: G1, h: G2): GT;
+        export interface GT extends Common {
+            serialize(): string;
 
-        export function add<T = Fr | GT | G1 | G2>(a: T, b: T): T;
+            isEqual(g: Common): boolean;
+        }
 
-        export function sub<T = Fr | GT | G1 | G2>(a: T, b: T): T;
+        export interface Mcl {
 
-        export function mul<T = Fr | GT | G1 | G2>(a: T, b: Common): T;
+            deserializeHexStrToG1(str: string): G1;
 
-        export function div<T = Fr | GT>(a: T, b: T): T;
+            deserializeHexStrToG2(str: string): G2;
 
-        export function inv<T = Fr | GT>(a: T): T;
+            deserializeHexStrToFr(str: string): Fr;
 
-        export function pow(a: GT, b: Fr): GT;
+            deserializeHexStrToGT(str: string): GT;
+
+            hashAndMapToG1(str: string): G1;
+
+            hashAndMapToG2(str: string): G2;
+
+            hashToFr(str: string): Fr;
+
+            pairing(g: G1, h: G2): GT;
+
+            add<T = Fr | GT | G1 | G2>(a: T, b: T): T;
+
+            sub<T = Fr | GT | G1 | G2>(a: T, b: T): T;
+
+            mul<T = Fr | GT | G1 | G2>(a: T, b: Common): T;
+
+            div<T = Fr | GT>(a: T, b: T): T;
+
+            inv<T = Fr | GT>(a: T): T;
+
+            pow(a: GT, b: Fr): GT;
+
+            GT: GT;
+            G1: G1;
+            G2: G2;
+            Fr: Fr;
+        }
+
+        export function init(curve?: number): Promise<Mcl>;
 
         export const BN254: 0;
         export const BN381_1: 1;
@@ -45,31 +83,6 @@ declare module 'mcl-wasm' {
         export const NIST_P224: 106;
         export const NIST_P256: 107;
 
-        export class Common {
-            constructor();
-
-            serializeToHexStr(): string;
-        }
-
-        export class G1 extends Common {
-            serialize(): string;
-        }
-
-        export class G2 extends Common {
-            serialize(): string;
-        }
-
-        export class Fr extends Common {
-            serialize(): string;
-
-            setByCSPRNG(): void;
-        }
-
-        export class GT extends Common {
-            serialize(): string;
-
-            isEqual(g: Common): boolean;
-        }
     }
 
     export = mcl;
