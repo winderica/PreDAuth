@@ -15,7 +15,7 @@ const App = () => {
     const [rk, setRK] = useState('');
     const [{ cb0, cb1 }, setReEncrypted] = useState({ cb0: '', cb1: '' });
     const [message, setMessage] = useState('');
-    const [{ alice, bob, proxy }, setRoles] = useState({ alice: null, bob: null, proxy: null });
+    const [{ alice, bob, proxy }, setRoles] = useState({ alice: undefined, bob: undefined, proxy: undefined });
     useEffect(() => {
         (async () => {
             await pre.init();
@@ -25,22 +25,22 @@ const App = () => {
             setGH({ g, h });
             setRoles({ alice: new Alice(pre, g, h), bob: new Bob(pre, g, h), proxy });
         })();
-    }, [])
+    }, []);
     const handleEncrypt = () => {
         setEncrypted(alice.encrypt(message));
-    }
+    };
     const handleGetRK = () => {
         setRK(alice.reKey(bob.pk));
-    }
+    };
     const handleReEncrypt = () => {
         setReEncrypted(proxy.reEncrypt({ ca0, ca1 }, rk));
-    }
+    };
     const handleDecrypt = () => {
         setDecrypted(bob.reDecrypt(cipher, { cb0, cb1 }, iv));
-    }
+    };
     const handleInput = (event) => {
         setMessage(event.target.value);
-    }
+    };
     return initialized && (
         <>
             <TextField label='Message' onChange={handleInput} value={message} />
@@ -66,10 +66,10 @@ const App = () => {
             <FormControl fullWidth><TextField label="Decrypted" multiline rowsMax={4} value={decrypted} /></FormControl>
         </>
     );
-}
+};
 
 
 render(
     <App />,
     document.querySelector('#root')
-)
+);

@@ -23,10 +23,10 @@ module.exports = {
             // to have their public URL.
             {
                 test: /\.wasm$/,
-                type: "javascript/auto",
-                loader: "file-loader",
+                type: 'javascript/auto',
+                loader: 'file-loader',
                 options: {
-                    publicPath: "dist/"
+                    publicPath: 'dist/'
                 }
             },
             {

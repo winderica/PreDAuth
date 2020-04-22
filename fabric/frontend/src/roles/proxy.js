@@ -11,11 +11,11 @@ export class ProxyNode {
         return {
             cb0: this.pre.serialize(cb0),
             cb1: this.pre.serialize(cb1),
-        }
+        };
     }
 
     getGH() {
-        const { g, h } = this.pre.generatorGen("aaa", "bbb");
+        const { g, h } = this.pre.generatorGen('aaa', 'bbb');
         return { g: this.pre.serialize(g), h: this.pre.serialize(h) };
     }
 }
