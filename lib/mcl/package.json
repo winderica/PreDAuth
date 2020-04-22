@@ -1,5 +1,6 @@
 {
   "name": "mcl",
   "version": "1.0.0",
-  "main": "mcl.js"
+  "main": "mcl.js",
+  "types": "./index.d.ts"
 }
