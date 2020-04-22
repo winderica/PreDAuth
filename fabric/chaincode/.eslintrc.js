@@ -15,6 +15,8 @@ module.exports = {
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
     ],
     rules: {
-        "@typescript-eslint/explicit-function-return-type": "off"
+        "@typescript-eslint/explicit-function-return-type": 'off',
+        quotes: ['warn', 'single', { avoidEscape: true }],
+        semi: ['warn', 'always']
     }
 };

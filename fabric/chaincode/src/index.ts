@@ -10,7 +10,7 @@ import { ProxyNode } from './roles/proxy';
     const { g, h } = proxy.getGH();
     const alice = new Alice(pre, g, h);
     const bob = new Bob(pre, g, h);
-    const { cipher, key, iv } = alice.encrypt("Lorem ipsum");
+    const { cipher, key, iv } = alice.encrypt('Lorem ipsum');
     const rk = alice.reKey(bob.pk);
     const reEncryptedKey = proxy.reEncrypt(key, rk);
     const decrypted = bob.reDecrypt(cipher, reEncryptedKey, iv);

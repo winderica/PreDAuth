@@ -1,6 +1,5 @@
 import { Fr, G1, G2 } from 'mcl';
 import { PRE } from '../utils/pre';
-import * as crypto from 'crypto';
 import { AES } from '../utils/aes';
 
 export class Alice {
@@ -8,10 +7,8 @@ export class Alice {
     private readonly _h!: G2;
     private readonly _sk!: Fr;
     private readonly _pk!: G1;
-    private readonly pre: PRE;
 
-    constructor(pre: PRE, g: string, h: string) {
-        this.pre = pre;
+    constructor(private readonly pre: PRE, g: string, h: string) {
         this._g = this.pre.deserialize(g, 'G1');
         this._h = this.pre.deserialize(h, 'G2');
         const { sk, pk } = this.pre.keyGenInG1(this._g);
@@ -25,8 +22,7 @@ export class Alice {
 
     encrypt(plaintext: string) {
         const aesKey = this.pre.randomGen();
-        const iv = crypto.randomBytes(16);
-        const aes = new AES(Buffer.from(aesKey, 'hex'), iv);
+        const aes = new AES(Buffer.from(aesKey, 'hex'));
         const cipher = aes.encrypt(plaintext);
         const { ca0, ca1 } = this.pre.encrypt(aesKey, this._pk, this._g, this._h);
         return {
@@ -35,7 +31,7 @@ export class Alice {
                 ca0: this.pre.serialize(ca0),
                 ca1: this.pre.serialize(ca1),
             },
-            iv: iv.toString('hex'),
+            iv: (aes.iv as Buffer).toString('hex'),
         };
     }
 

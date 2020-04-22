@@ -11,6 +11,8 @@
     "outDir": "dist",
     "pretty": true,
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "strict": true,
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,

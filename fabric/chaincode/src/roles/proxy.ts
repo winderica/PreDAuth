@@ -1,10 +1,7 @@
 import { PRE } from '../utils/pre';
 
 export class ProxyNode {
-    private readonly pre: PRE;
-
-    constructor(pre: PRE) {
-        this.pre = pre;
+    constructor(private readonly pre: PRE) {
     }
 
     reEncrypt({ ca0, ca1 }: { ca0: string; ca1: string }, rk: string) {
@@ -15,11 +12,11 @@ export class ProxyNode {
         return {
             cb0: this.pre.serialize(cb0),
             cb1: this.pre.serialize(cb1),
-        }
+        };
     }
 
     getGH() {
-        const { g, h } = this.pre.generatorGen("aaa", "bbb");
+        const { g, h } = this.pre.generatorGen('aaa', 'bbb');
         return { g: this.pre.serialize(g), h: this.pre.serialize(h) };
     }
 }

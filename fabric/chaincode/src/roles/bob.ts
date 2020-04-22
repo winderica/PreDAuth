@@ -7,10 +7,8 @@ export class Bob {
     private readonly _h!: G2;
     private readonly _sk!: Fr;
     private readonly _pk!: G2;
-    private readonly pre: PRE;
 
-    constructor(pre: PRE, g: string, h: string) {
-        this.pre = pre;
+    constructor(private readonly pre: PRE, g: string, h: string) {
         this._g = this.pre.deserialize(g, 'G1');
         this._h = this.pre.deserialize(h, 'G2');
         const { sk, pk } = this.pre.keyGenInG2(this._h);
