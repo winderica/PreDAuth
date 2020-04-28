@@ -1,0 +1,14 @@
+{
+  "name": "fabric-chaincode",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "./index.js",
+  "dependencies": {
+    "fabric-contract-api": "^2.1.1",
+    "fabric-shim": "^2.1.1",
+    "mcl": "file:./mcl"
+  },
+  "scripts": {
+    "start": "fabric-chaincode-node start"
+  }
+}

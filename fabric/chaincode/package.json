@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
-    "fabric-contract-api": "^2.1.0",
+    "fabric-contract-api": "^2.1.1",
     "mcl": "file:../../lib/mcl"
   },
   "devDependencies": {
@@ -14,6 +14,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "start": "tsc && node dist/index.js"
+    "build": "tsc && cp package-dist.json dist/package.json && cp -r ../../lib/mcl/ dist/",
+    "start": "node dist/index.js"
   }
 }
