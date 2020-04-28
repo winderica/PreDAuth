@@ -17,13 +17,13 @@ export class Alice {
     encrypt(plaintext) {
         const aesKey = this.pre.randomGen();
         const iv = Crypto.lib.WordArray.random(16);
-        const cipher = Crypto.AES.encrypt(plaintext, aesKey, {
+        const data = Crypto.AES.encrypt(plaintext, Crypto.enc.Hex.parse(aesKey), {
             iv,
             mode: Crypto.mode.CBC
         }).toString();
         const { ca0, ca1 } = this.pre.encrypt(aesKey, this._pk, this._g, this._h);
         return {
-            cipher,
+            data,
             key: {
                 ca0: this.pre.serialize(ca0),
                 ca1: this.pre.serialize(ca1),
@@ -37,8 +37,8 @@ export class Alice {
             ca0: this.pre.deserialize(ca0, 'Fr'),
             ca1: this.pre.deserialize(ca1, 'G1')
         }, this._sk, this._h);
-        return Crypto.AES.decrypt(cipher, aesKey, {
-            iv,
+        return Crypto.AES.decrypt(cipher, Crypto.enc.Hex.parse(aesKey), {
+            iv: Crypto.enc.Hex.parse(iv),
             mode: Crypto.mode.CBC
         }).toString(Crypto.enc.Utf8);
     }
