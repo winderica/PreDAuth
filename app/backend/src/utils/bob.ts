@@ -1,6 +1,5 @@
-import { Fr, G1, G2 } from 'mcl';
-import { PRE } from '../utils/pre';
-import { AES } from '../utils/aes';
+import { PRE, Fr, G1, G2 } from './pre';
+import { AES } from './aes';
 
 export class Bob {
     private readonly _g!: G1;
