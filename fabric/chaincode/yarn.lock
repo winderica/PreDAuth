@@ -470,22 +470,22 @@ external-editor@^3.0.3:
     iconv-lite "^0.4.24"
     tmp "^0.0.33"
 
-fabric-contract-api@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/fabric-contract-api/-/fabric-contract-api-2.1.0.tgz#1db8496d0fafeeecae0df8dacbba477212bca591"
-  integrity sha512-cC+7XtTuEaa703oKZ9A4mAKSTruber3GjRLPW00jEELJSvlgN0j7McWt30gUyxDYaCQpmIhm/I6eObM/RPlrDg==
+fabric-contract-api@^2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fabric-contract-api/-/fabric-contract-api-2.1.1.tgz#38c0beba42e98bc9c8a2bcb0d80df8801e300cb7"
+  integrity sha512-W3ksJB/4rnWckhqLt+ucqWpLAiCBj5qm8DUDyTJXySlKcCemVAUMFtTl5pxO40jB4bUtrMbuaQhop8e4BLSU7Q==
   dependencies:
     class-transformer "^0.2.2"
-    fabric-shim-api "2.1.0"
+    fabric-shim-api "2.1.1"
     fast-safe-stringify "~2.0.7"
     get-params "^0.1.2"
     reflect-metadata "^0.1.12"
     winston "^3.2.1"
 
-fabric-shim-api@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/fabric-shim-api/-/fabric-shim-api-2.1.0.tgz#ec43835596fa206dcde0b352440576ac523a4821"
-  integrity sha512-gEUMeN6bWp+Ykf4zRfSpSyxjYrcUgIJrSuDXKR8myvvNvTjOrk0K52X9/4HXZuoKx+7geTkSWuQ+6cEVjPiKmg==
+fabric-shim-api@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fabric-shim-api/-/fabric-shim-api-2.1.1.tgz#cc6bac3edc3aeb0439e5c9e460eb7dc69a0fad4d"
+  integrity sha512-FqJq9nMiRc8thrc6qgmahhYcQx6ISZ19yhNElkxqrQk0bYz9I6tpO8AgjnGsplesKzObTxp4VoGb5SB2JUJYBw==
 
 fast-deep-equal@^3.1.1:
   version "3.1.1"

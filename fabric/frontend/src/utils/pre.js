@@ -1,4 +1,4 @@
-import { BLS12_381, init } from "mcl";
+import { BLS12_381, init } from 'mcl';
 
 export class PRE {
     async init(curve = BLS12_381) {
@@ -39,11 +39,11 @@ export class PRE {
         const e = this.mcl.pairing(ca1, h); // e(Ca1, h) = e(g^(ra), h)
         const eInv = this.mcl.pow(e, this.mcl.inv(sk)); // e(g^(ra), h)^(1/SKa) = e(g^(ra), h)^(1/a) = e(g, h)^r = Z^r
         const decrypted = this.mcl.sub(ca0, this.mcl.hashToFr(eInv.serialize())); // Ca0/Z^r = m*Z^r/Z^r = m
-        return this.serialize(decrypted)
+        return this.serialize(decrypted);
     }
 
     reKeyGen(ska, pkb) {
-        return this.mcl.mul(pkb, this.mcl.inv(ska)) // RK = PKb^(1/SKa) = h^(b/a)
+        return this.mcl.mul(pkb, this.mcl.inv(ska)); // RK = PKb^(1/SKa) = h^(b/a)
     }
 
     reEncrypt({ ca0, ca1 }, reKey) {

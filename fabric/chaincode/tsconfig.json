@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "lib": [
       "esnext"
     ],
@@ -10,7 +10,10 @@
     ],
     "outDir": "dist",
     "pretty": true,
+    "module": "CommonJS",
     "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "strict": true,
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
@@ -18,6 +21,7 @@
     "noUnusedParameters": true
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }
