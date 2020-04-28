@@ -40,5 +40,11 @@ export class PreDAuth extends Contract {
         });
     }
 
+    getGH() {
+        return JSON.stringify({
+            g: this.pre.serialize(this.g),
+            h: this.pre.serialize(this.h),
+        });
+    }
 }
 
