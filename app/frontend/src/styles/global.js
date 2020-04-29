@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { pink, blue } from '@material-ui/core/colors';
 import { createMuiTheme } from '@material-ui/core';
 
