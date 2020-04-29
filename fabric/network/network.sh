@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PATH=${PWD}/bin:${PWD}:$PATH
-export FABRIC_CFG_PATH=${PWD}/configtx
+export FABRIC_CFG_PATH=${PWD}/config
 export VERBOSE=false
 
 function clearContainers() {
@@ -41,11 +41,11 @@ function createChannel() {
   if [ ! -d "organizations/peerOrganizations" ]; then
     networkUp
   fi
-  scripts/createChannel.sh "$CHANNEL_NAME" "$CLI_DELAY" "$MAX_RETRY" $VERBOSE
+  scripts/createChannel.sh "$CHANNEL_NAME"
 }
 
 function deployCC() {
-  scripts/deployCC.sh "$CHANNEL_NAME" "$CC_SRC_LANGUAGE" "$VERSION" "$CLI_DELAY" "$MAX_RETRY" $VERBOSE
+  scripts/deployCC.sh "$CHANNEL_NAME" "$VERSION"
   exit 0
 }
 
@@ -58,20 +58,15 @@ function networkDown() {
     rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
     rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
     rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
-    rm -rf addOrg3/fabric-ca/org3/msp addOrg3/fabric-ca/org3/tls-cert.pem addOrg3/fabric-ca/org3/ca-cert.pem addOrg3/fabric-ca/org3/IssuerPublicKey addOrg3/fabric-ca/org3/IssuerRevocationPublicKey addOrg3/fabric-ca/org3/fabric-ca-server.db
-    rm -rf channel-artifacts log.txt fabcar.tar.gz fabcar
+    rm -rf channel-artifacts log.txt PreDAuth.tar.gz PreDAuth
   fi
 }
 
-MAX_RETRY=5
-CLI_DELAY=3
-CHANNEL_NAME="mychannel"
-CC_SRC_LANGUAGE=typescript
+CHANNEL_NAME="channel"
 VERSION=1
 COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
 COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml
 COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
-
 
 if [[ $# -lt 1 ]]; then
   exit 0
@@ -93,14 +88,6 @@ while [[ $# -ge 1 ]]; do
   case $key in
   -c)
     CHANNEL_NAME="$2"
-    shift
-    ;;
-  -r)
-    MAX_RETRY="$2"
-    shift
-    ;;
-  -d)
-    CLI_DELAY="$2"
     shift
     ;;
   -v)

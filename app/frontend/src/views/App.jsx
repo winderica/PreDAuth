@@ -5,8 +5,7 @@ import { theme, useStyles } from '../styles/global';
 import { Router } from '@reach/router';
 import { ThemeProvider } from '@material-ui/core';
 
-
-export const Index = () => {
+export const App = () => {
     useStyles();
     return (
         <ThemeProvider theme={theme}>

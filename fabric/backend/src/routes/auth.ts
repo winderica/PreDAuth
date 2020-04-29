@@ -19,10 +19,9 @@ auth.get('/generators/:id', async (req, res, next) => {
 
 auth.post('/reEncrypt/:id/:to', async (req, res, next) => {
     try {
-        const { rk } = req.body;
         const { id, to } = req.params;
         const contract = await getContract(id);
-        const result = await contract.evaluateTransaction('reEncrypt', id, rk);
+        const result = await contract.evaluateTransaction('reEncrypt', id, JSON.stringify(req.body));
         await fetch(to, {
             method: 'POST',
             headers: {

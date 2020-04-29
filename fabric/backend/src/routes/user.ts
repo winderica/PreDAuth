@@ -15,10 +15,18 @@ user.post('/register', async (req, res, next) => {
 
 user.post('/:id/data', async (req, res, next) => {
     try {
-        const { data, key: { ca0, ca1 }, iv } = req.body;
         const contract = await getContract(req.params.id);
-        await contract.submitTransaction('saveData', req.params.id, data, ca0, ca1, iv);
+        await contract.submitTransaction('saveData', req.params.id, JSON.stringify(req.body));
         res.json({ ok: true });
+    } catch (e) {
+        next(e);
+    }
+});
+
+user.get('/:id/data', async (req, res, next) => {
+    try {
+        const contract = await getContract(req.params.id);
+        res.json({ ok: true, payload: JSON.parse(await contract.evaluateTransaction('getData', req.params.id)) });
     } catch (e) {
         next(e);
     }
