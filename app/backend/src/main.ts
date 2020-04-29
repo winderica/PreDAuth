@@ -13,27 +13,31 @@ const pre = new PRE();
 const id = 'bob';
 
 (async () => {
-    await pre.init();
-    await fetch('http://127.0.0.1:4000/user/register', {
-        method: 'POST',
-        body: JSON.stringify({ id }),
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
-    const { payload: { g, h } } = await (await fetch(`http://127.0.0.1:4000/auth/generators/${id}`)).json();
-    const bob = new Bob(pre, g, h);
+    try {
+        await pre.init();
+        await fetch('http://127.0.0.1:4000/user/register', {
+            method: 'POST',
+            body: JSON.stringify({ id }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const { payload: { g, h } } = await (await fetch(`http://127.0.0.1:4000/auth/generators/${id}`)).json();
+        const bob = new Bob(pre, g, h);
 
-    app.get('/pk', (_, res) => {
-        res.json({ pk: bob.pk });
-    });
+        app.get('/pk', (_, res) => {
+            res.json({ pk: bob.pk });
+        });
 
-    app.post('/decrypt', (req, res) => {
-        const { data, key, iv } = req.body;
-        console.log(bob.reDecrypt(data, key, iv));
-        res.sendStatus(200);
-    });
+        app.post('/decrypt', (req, res) => {
+            const { data, key, iv } = req.body;
+            console.log(bob.reDecrypt(data, key, iv));
+            res.sendStatus(200);
+        });
 
-    app.listen(4001, '0.0.0.0');
+        app.listen(4001, '0.0.0.0');
 
+    } catch (e) {
+        console.log(e);
+    }
 })();
