@@ -25,9 +25,9 @@ export const getContract = async (id: string) => {
         }
     });
 
-    const network = await gateway.getNetwork('mychannel');
+    const network = await gateway.getNetwork('channel');
 
-    return network.getContract('fabcar');
+    return network.getContract('PreDAuth');
 };
 
 export const addAdmin = async () => {

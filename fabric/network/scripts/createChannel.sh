@@ -6,6 +6,7 @@ export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers
 export CORE_PEER_TLS_ENABLED=true
 export PEER0_ORG1_CA=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
 export PEER0_ORG2_CA=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
+export FABRIC_CFG_PATH=${PWD}/config
 
 setGlobals() {
   if [ "$1" -eq 1 ]; then
@@ -46,12 +47,8 @@ updateAnchorPeers() {
   peer channel update -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com -c "$CHANNEL_NAME" -f ./channel-artifacts/${CORE_PEER_LOCALMSPID}anchors.tx --tls "$CORE_PEER_TLS_ENABLED" --cafile "$ORDERER_CA"
 }
 
-FABRIC_CFG_PATH=${PWD}/configtx
-
 createChannelTx
 createAncorPeerTx
-
-FABRIC_CFG_PATH=${PWD}/config
 
 createChannel
 
