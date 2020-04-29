@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { render } from 'react-dom';
-import { Index } from './views/Index';
+import { App } from './views/App';
 
 render(
-    <Index />,
+    <StrictMode>
+        <App />
+    </StrictMode>,
     document.querySelector('#root')
 );

@@ -8,7 +8,8 @@ module.exports = {
     plugins: ['react'],
     rules: {
         quotes: ['warn', 'single', { avoidEscape: true }],
-        semi: ['warn', 'always']
+        semi: ['warn', 'always'],
+        'react/prop-types': ['off']
     },
     env: {
         'browser': true

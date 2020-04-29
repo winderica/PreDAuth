@@ -12,8 +12,8 @@ export class PRE {
         };
     }
 
-    keyGenInG1(g) {
-        const sk = this.randomInFr(); // SKa = a is randomly selected from Fr
+    keyGenInG1(g, sk) {
+        sk = sk ? this.mcl.deserializeHexStrToFr(sk) : this.randomInFr(); // SKa = a is randomly selected from Fr
         const pk = this.mcl.mul(g, sk); // PKa = g^SKa = g^a
         return { sk, pk };
     }
