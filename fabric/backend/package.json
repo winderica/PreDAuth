@@ -22,6 +22,6 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "./scripts/copy.sh && ts-node src/main.ts"
+    "start": "./scripts/start.sh && ts-node src/main.ts"
   }
 }
