@@ -30,8 +30,8 @@ const id = 'bob';
         });
 
         app.post('/decrypt', (req, res) => {
-            const { data, key, iv } = req.body;
-            console.log(bob.reDecrypt(data, key, iv));
+            const data = req.body as { data: string; key: { cb0: string; cb1: string }; iv: string }[];
+            data.map(({ data, key, iv }) => console.log(bob.reDecrypt(data, key, iv)));
             res.sendStatus(200);
         });
 
