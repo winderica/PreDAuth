@@ -14,30 +14,33 @@ export class PreDAuth extends Contract {
         this.h = h;
     }
 
-    async saveData(ctx: Context, id: string, data: string, ca0: string, ca1: string, iv: string) {
-        await ctx.stub.putState(id, Buffer.from(JSON.stringify({ data, key: { ca0, ca1 }, iv })));
-        return JSON.stringify({ data, key: { ca0, ca1 }, iv });
+    async saveData(ctx: Context, id: string, data: string) {
+        await ctx.stub.putState(id, Buffer.from(data));
     }
 
     async getData(ctx: Context, id: string) {
         return Buffer.from(await ctx.stub.getState(id)).toString('utf8');
     }
 
-    async reEncrypt(ctx: Context, id: string, rk: string) {
-        const ca = Buffer.from(await ctx.stub.getState(id)).toString('utf8');
-        const { data, key: { ca0, ca1 }, iv } = JSON.parse(ca);
-        const { cb0, cb1 } = this.pre.reEncrypt({
-            ca0: this.pre.deserialize(ca0, 'Fr'),
-            ca1: this.pre.deserialize(ca1, 'G1')
-        }, this.pre.deserialize(rk, 'G2'));
-        return JSON.stringify({
-            data,
-            key: {
-                cb0: this.pre.serialize(cb0),
-                cb1: this.pre.serialize(cb1),
-            },
-            iv,
+    async reEncrypt(ctx: Context, id: string, rks: string) {
+        const data = JSON.parse(Buffer.from(await ctx.stub.getState(id)).toString('utf8'));
+        const tagRK = JSON.parse(rks) as { [tag: string]: string };
+        const res = Object.entries(tagRK).map(([tag, rk]) => {
+            const { ca0, ca1 } = data[tag].key;
+            const { cb0, cb1 } = this.pre.reEncrypt({
+                ca0: this.pre.deserialize(ca0, 'Fr'),
+                ca1: this.pre.deserialize(ca1, 'G1')
+            }, this.pre.deserialize(rk, 'G2'));
+            return {
+                data: data[tag].data,
+                key: {
+                    cb0: this.pre.serialize(cb0),
+                    cb1: this.pre.serialize(cb1),
+                },
+                iv: data[tag].iv,
+            };
         });
+        return JSON.stringify(res);
     }
 
     getGH() {
