@@ -22,7 +22,7 @@ const id = 'bob';
                 'Content-Type': 'application/json'
             }
         });
-        const { payload: { g, h } } = await (await fetch(`http://127.0.0.1:4000/auth/generators/${id}`)).json();
+        const { payload: { g, h } } = await (await fetch(`http://127.0.0.1:4000/auth/generators`)).json();
         const bob = new Bob(pre, g, h);
 
         app.get('/pk', (_, res) => {

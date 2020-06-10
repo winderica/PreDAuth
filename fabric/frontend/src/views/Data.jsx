@@ -7,45 +7,69 @@ import { useStores } from '../hooks/useStores';
 import { AliceContext } from '../contexts';
 import { Table } from '../components/Table';
 import { API } from '../constants';
+import { Notifier } from '../components/Notifier';
+import { AlertDialog } from '../components/AlertDialog';
 
 export const Data = observer(() => {
     const classes = useStyles();
-    const { userDataStore, identityStore, keyStore } = useStores();
+    const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
     const alice = useContext(AliceContext);
     useEffect(() => {
         (async () => {
-            const { payload } = await (await fetch(API.data(identityStore.id))).json();
-            Object.entries(payload).forEach(([tag, data]) => {
-               Object.entries(JSON.parse(alice.decrypt(data, keyStore.key[tag].sk))).map(([key, value]) => userDataStore.set(key, value, tag));
+            const { ok, payload } = await (await fetch(API.data(identityStore.id))).json();
+            if (!ok) {
+                notificationStore.enqueueSnackbar({
+                    message: payload,
+                    options: {
+                        variant: 'info',
+                    },
+                });
+                return;
+            }
+            Object.entries(payload).map(async ([tag, data]) => {
+                Object.entries(JSON.parse(await alice.decrypt(data, keyStore.key[tag].sk))).map(([key, value]) => userDataStore.set(key, value, tag));
+            });
+            notificationStore.enqueueSnackbar({
+                message: '已成功恢复数据',
+                options: {
+                    variant: 'success',
+                },
             });
         })();
     }, []);
     const handleEncrypt = async () => {
         const data = userDataStore.dataGroupedByTag;
         const encrypted = {};
-        Object.keys(data).forEach((tag) => {
+        Object.keys(data).map(async (tag) => {
             const { pk, sk } = alice.key();
             keyStore.set(tag, { pk, sk });
-            encrypted[tag] = alice.encrypt(JSON.stringify(data[tag]), pk);
+            encrypted[tag] = await alice.encrypt(JSON.stringify(data[tag]), pk);
         });
-        await fetch(API.data(identityStore.id), {
+        const { ok, payload } = await (await fetch(API.data(identityStore.id), {
             method: 'POST',
             body: JSON.stringify(encrypted),
             headers: {
                 'Content-Type': 'application/json'
             }
+        })).json();
+        notificationStore.enqueueSnackbar({
+            message: ok ? '成功加密并提交' : payload,
+            options: {
+                variant: ok ? 'success' : 'error',
+            },
         });
     };
     return (
         <div className={classes.container}>
+            <Notifier />
             <Table
                 columns={[
-                    { title: 'key', field: 'key', grouping: false },
-                    { title: 'value', field: 'value', grouping: false },
-                    { title: 'tag', field: 'tag' },
+                    { title: '键', field: 'key', grouping: false },
+                    { title: '值', field: 'value', grouping: false },
+                    { title: '标签', field: 'tag' },
                 ]}
-                title='Personal information'
-                data={userDataStore.dataArray}
+                title='个人信息'
+                data={userDataStore.dataArray.filter(i => i.tag !== '重要')}
                 editable={{
                     onRowDelete: async ({ key }) => userDataStore.del(key),
                     onRowAdd: async ({ key, value, tag }) => userDataStore.set(key, value, tag),
@@ -61,7 +85,7 @@ export const Data = observer(() => {
                 color='primary'
                 className={classes.button}
             >
-                encrypt
+                加密并提交
             </Button>
         </div>
     );

@@ -4,11 +4,12 @@ import { AppBar } from './AppBar';
 import { Menu } from './Menu';
 
 import { useStyles } from '../styles/frame';
-import { Fingerprint, List } from '@material-ui/icons';
+import { Backup, Fingerprint, List } from '@material-ui/icons';
 
 const listItems = [
     { to: '/data', text: 'data', icon: <List /> },
     { to: '/auth', text: 'auth', icon: <Fingerprint /> },
+    { to: '/backup', text: 'backup', icon: <Backup /> },
 ];
 
 export const Frame = ({ children }) => {

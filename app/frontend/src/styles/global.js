@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles';
-import { pink, blue } from '@material-ui/core/colors';
+import { blueGrey, deepOrange } from '@material-ui/core/colors';
 import { createMuiTheme } from '@material-ui/core';
 
 export const useStyles = makeStyles(() => ({
@@ -23,7 +23,7 @@ export const useStyles = makeStyles(() => ({
 
 export const theme = createMuiTheme({
     palette: {
-        primary: blue,
-        secondary: pink,
+        primary: deepOrange,
+        secondary: blueGrey,
     }
 });

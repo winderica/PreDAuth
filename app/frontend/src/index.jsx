@@ -6,5 +6,5 @@ render(
     <StrictMode>
         <App />
     </StrictMode>,
-    document.querySelector('#root')
+    document.querySelector('react')
 );

@@ -54,10 +54,8 @@ checkBrowsers(paths.appPath, isInteractive)
             paths.publicUrlOrPath.slice(0, -1)
         );
         const devSocket = {
-            warnings: warnings =>
-                devServer.sockWrite(devServer.sockets, 'warnings', warnings),
-            errors: errors =>
-                devServer.sockWrite(devServer.sockets, 'errors', errors),
+            warnings: warnings => devServer.sockWrite(devServer.sockets, 'warnings', warnings),
+            errors: errors => devServer.sockWrite(devServer.sockets, 'errors', errors),
         };
         const compiler = createCompiler({
             appName,
@@ -90,15 +88,15 @@ checkBrowsers(paths.appPath, isInteractive)
             openBrowser(urls.localUrlForBrowser);
         });
 
-        ['SIGINT', 'SIGTERM'].forEach(function (sig) {
-            process.on(sig, function () {
+        ['SIGINT', 'SIGTERM'].forEach(sig => {
+            process.on(sig, () => {
                 devServer.close();
                 process.exit();
             });
         });
 
         if (isInteractive || process.env.CI !== 'true') {
-            process.stdin.on('end', function () {
+            process.stdin.on('end', () => {
                 devServer.close();
                 process.exit();
             });

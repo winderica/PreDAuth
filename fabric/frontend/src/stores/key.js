@@ -2,7 +2,7 @@ import { action, observable } from 'mobx';
 
 export class KeyStore {
     @observable
-    key = JSON.parse(localStorage.getItem('key') || '{}')
+    key = JSON.parse(localStorage.getItem('key') || '{}');
 
     @action
     set(tag, key) {

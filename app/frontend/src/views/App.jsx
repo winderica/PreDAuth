@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dashboard } from './Dashboard';
-import { Login } from './Login';
+import { Signup } from './Signup';
 import { theme, useStyles } from '../styles/global';
 import { Router } from '@reach/router';
 import { ThemeProvider } from '@material-ui/core';
@@ -10,8 +10,8 @@ export const App = () => {
     return (
         <ThemeProvider theme={theme}>
             <Router>
-                <Login path="/" />
-                <Dashboard path="/aaa" />
+                <Signup path='/' />
+                <Dashboard path='/dashboard' />
             </Router>
         </ThemeProvider>
     );

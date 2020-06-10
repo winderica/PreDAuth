@@ -2,7 +2,7 @@ import { observable, action } from 'mobx';
 
 export class IdentityStore {
     @observable
-    id = ''
+    id = '';
 
     @action
     set(id) {

@@ -3,15 +3,14 @@ import { makeStyles } from '@material-ui/core';
 export const useStyles = makeStyles(({ spacing, breakpoints }) => ({
     root: {
         display: 'flex',
+        height: '100vh',
     },
     content: {
         flexGrow: 1,
         marginTop: spacing(8),
-        height: 'calc(100vh - 64px)',
         overflowX: 'auto',
         [breakpoints.down('xs')]: {
             marginTop: spacing(6),
-            height: 'calc(100vh - 48px)',
         },
         padding: spacing(2)
     },

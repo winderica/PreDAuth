@@ -12,6 +12,7 @@ module.exports = {
         'react/prop-types': ['off']
     },
     env: {
-        'browser': true
+        'browser': true,
+        'es6': true
     }
 };

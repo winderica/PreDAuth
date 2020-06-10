@@ -16,7 +16,7 @@ module.exports = {
     ],
     rules: {
         "@typescript-eslint/explicit-function-return-type": 'off',
-        quotes: ['warn', 'single', { avoidEscape: true }],
-        semi: ['warn', 'always']
+        '@typescript-eslint/quotes': ['warn', 'single', { avoidEscape: true }],
+        '@typescript-eslint/semi': ['warn', 'always']
     }
 };

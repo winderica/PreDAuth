@@ -2,7 +2,7 @@ import { action, computed, observable } from 'mobx';
 
 export class UserDataStore {
     @observable
-    data = {}
+    data = {};
 
     @action
     set(key, value, tag) {

@@ -45,7 +45,7 @@ function createChannel() {
 }
 
 function deployCC() {
-  scripts/deployCC.sh "$CHANNEL_NAME" "$VERSION"
+  scripts/deployCC.sh "$CHANNEL_NAME" "$VERSION" "$CHAINCODE_NAME"
   exit 0
 }
 
@@ -58,12 +58,13 @@ function networkDown() {
     rm -rf organizations/fabric-ca/org1/msp organizations/fabric-ca/org1/tls-cert.pem organizations/fabric-ca/org1/ca-cert.pem organizations/fabric-ca/org1/IssuerPublicKey organizations/fabric-ca/org1/IssuerRevocationPublicKey organizations/fabric-ca/org1/fabric-ca-server.db
     rm -rf organizations/fabric-ca/org2/msp organizations/fabric-ca/org2/tls-cert.pem organizations/fabric-ca/org2/ca-cert.pem organizations/fabric-ca/org2/IssuerPublicKey organizations/fabric-ca/org2/IssuerRevocationPublicKey organizations/fabric-ca/org2/fabric-ca-server.db
     rm -rf organizations/fabric-ca/ordererOrg/msp organizations/fabric-ca/ordererOrg/tls-cert.pem organizations/fabric-ca/ordererOrg/ca-cert.pem organizations/fabric-ca/ordererOrg/IssuerPublicKey organizations/fabric-ca/ordererOrg/IssuerRevocationPublicKey organizations/fabric-ca/ordererOrg/fabric-ca-server.db
-    rm -rf channel-artifacts log.txt PreDAuth.tar.gz PreDAuth
+    rm -rf channel-artifacts log.txt "$CHAINCODE_NAME".tar.gz
   fi
 }
 
 CHANNEL_NAME="channel"
 VERSION=1
+CHAINCODE_NAME="chaincode"
 COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
 COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml
 COMPOSE_FILE_CA=docker/docker-compose-ca.yaml
@@ -92,6 +93,10 @@ while [[ $# -ge 1 ]]; do
     ;;
   -v)
     VERSION="$2"
+    shift
+    ;;
+  -n)
+    CHAINCODE_NAME="$2"
     shift
     ;;
   esac

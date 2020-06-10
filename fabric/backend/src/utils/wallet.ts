@@ -1,6 +1,6 @@
 import path from 'path';
 import { Gateway, Wallets, X509Identity } from 'fabric-network';
-import ccp from '../../assets/connection-org1.json';
+import ccp from '@assets/connection-org1.json';
 import FabricCAServices, { IKeyValueAttribute } from 'fabric-ca-client';
 
 const getWallet = async () => {
