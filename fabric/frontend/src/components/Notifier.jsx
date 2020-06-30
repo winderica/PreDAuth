@@ -15,7 +15,7 @@ export const Notifier = () => {
                 enqueueSnackbar(notification.message, notification.options);
                 setDisplayed((displayed) => [...displayed, notification.key]);
                 notificationStore.removeSnackbar(notification.key);
-                closeSnackbar(notification.key)
+                closeSnackbar(notification.key);
             });
         });
     }, []);

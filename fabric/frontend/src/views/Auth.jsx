@@ -1,20 +1,33 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AliceContext } from '../contexts';
 import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import { useStores } from '../hooks/useStores';
 import { API } from '../constants';
 import { observer } from 'mobx-react';
+import { Redirect } from '@reach/router';
 
 export const Auth = observer(() => {
-    const { userDataStore, identityStore, keyStore } = useStores();
+    const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
+    if (!identityStore.id) {
+        return <Redirect to='/' noThrow />;
+    }
     const [checked, setChecked] = useState({});
     const alice = useContext(AliceContext);
-
+    useEffect(() => {
+        (async () => {
+            if (userDataStore.todo) {
+                await userDataStore.fetch(identityStore.id, alice, keyStore.dataKey);
+                userDataStore.error
+                    ? notificationStore.enqueueError(userDataStore.message)
+                    : notificationStore.enqueueSuccess('已成功恢复数据');
+            }
+        })();
+    }, []);
     const reEncrypt = async () => {
         const { pk } = await (await fetch('http://127.0.0.1:4001/pk')).json();
         const data = {};
         Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
-            data[tag] = alice.reKey(pk, keyStore.key[tag].sk);
+            data[tag] = alice.reKey(pk, keyStore.dataKey[tag].sk);
         });
         await fetch(API.reEncrypt(identityStore.id, 'http://127.0.0.1:4001/decrypt'), {
             method: 'POST',
@@ -33,11 +46,11 @@ export const Auth = observer(() => {
             <CardHeader title='授权应用' />
             <CardContent>
                 <Typography>为应用生成重加密密钥，将您保存在PreDAuth上的数据安全地发送给应用。</Typography>
-                <Typography>应用YouChat想要获取您如下标签的数据：</Typography>
-                {Object.keys(keyStore.key).map((tag) => <FormControlLabel
-                    control={<Checkbox checked={!!checked[tag]} onChange={handleCheck} name={tag} />}
-                    label={tag}
-                    key={tag}
+                <Typography>应用YouChat想要获取您的如下数据：</Typography>
+                {Object.keys(userDataStore.data).map((key) => <FormControlLabel
+                    control={<Checkbox checked={!!checked[key]} onChange={handleCheck} name={key} />}
+                    label={key}
+                    key={key}
                 />)}
                 {/*<Typography>应用YouChat想要更新您的以下数据：</Typography>*/}
                 {/*<Table*/}
@@ -59,7 +72,7 @@ export const Auth = observer(() => {
                 {/*/>*/}
             </CardContent>
             <CardActions>
-                <Button onClick={reEncrypt} variant="contained" color="primary">授权登录</Button>
+                <Button onClick={reEncrypt} variant='contained' color='primary'>授权登录</Button>
             </CardActions>
         </Card>
     );

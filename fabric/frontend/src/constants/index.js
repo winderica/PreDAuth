@@ -1,8 +1,14 @@
-// fabric backend
 export class API {
-    static root = 'http://127.0.0.1:4000';
+    static root = 'https://predauth.com:4000';
     static register = `${this.root}/user/register`;
     static data = (id) => `${this.root}/user/${id}/data`;
-    static getGenerators = (id) => `${this.root}/auth/generators/${id}`;
+    static getGenerators = `${this.root}/auth/generators`;
     static reEncrypt = (id, redirect) => `${this.root}/auth/reEncrypt/${id}/${encodeURIComponent(redirect)}`;
+}
+
+export class STATE {
+    static todo = 'TODO';
+    static pending = 'PENDING';
+    static done = 'DONE';
+    static error = 'ERROR';
 }

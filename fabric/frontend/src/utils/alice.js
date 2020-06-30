@@ -35,11 +35,11 @@ export class Alice {
                 iv
             },
             key,
-            plaintext
+            new TextEncoder().encode(plaintext)
         );
         const { ca0, ca1 } = this.pre.encrypt(aesKey, this.pre.deserialize(pk, 'G1'), this._g, this._h);
         return {
-            data: btoa(String.fromCharCode(...data)),
+            data: btoa(String.fromCharCode(...new Uint8Array(data))),
             key: {
                 ca0: this.pre.serialize(ca0),
                 ca1: this.pre.serialize(ca1),
@@ -62,13 +62,13 @@ export class Alice {
             false,
             ['encrypt', 'decrypt']
         );
-        return crypto.subtle.decrypt(
+        return new TextDecoder().decode(await crypto.subtle.decrypt(
             {
                 name: 'AES-CBC',
                 iv: new Uint8Array(iv.match(/.{1,2}/g).map(byte => parseInt(byte, 16))),
             },
             key,
-            data
-        );
+            Uint8Array.from([...atob(data)].map(i => i.charCodeAt(0)))
+        ));
     }
 }

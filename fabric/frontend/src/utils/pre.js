@@ -1,4 +1,4 @@
-import { BLS12_381, G1, G2, init } from 'mcl';
+import { BLS12_381, init } from 'mcl';
 
 export class PRE {
     async init(curve = BLS12_381) {
@@ -28,11 +28,11 @@ export class PRE {
         return { sk, pk };
     }
 
-    encrypt(plain, pk, z) {
+    encrypt(plain, pk, g, h) {
         const r = this.randomInFr(); // r is randomly selected from Fr
 
         const m = this.mcl.deserializeHexStrToFr(plain);
-        // const z = this.mcl.pairing(g, h); // Z = e(g, h)
+        const z = this.mcl.pairing(g, h); // Z = e(g, h)
         const ca0 = this.mcl.add(m, this.mcl.hashToFr(this.mcl.pow(z, r).serialize())); // Ca0 = m*Z^r
 
         const ca1 = this.mcl.mul(pk, r); // Ca1 = PKa^r = g^(ra)

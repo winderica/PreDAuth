@@ -1,17 +1,19 @@
+import * as idb from 'idb-keyval';
 import { action, observable } from 'mobx';
 
 export class KeyStore {
     @observable
-    key = JSON.parse(localStorage.getItem('key') || '{}');
+    dataKey = {};
 
     @action
-    set(tag, key) {
-        this.key[tag] = key;
-        localStorage.setItem('key', JSON.stringify(this.key));
+    async load() {
+        this.dataKey = await idb.get('dataKey') || this.dataKey;
     }
 
     @action
-    del(tag) {
-        delete this.key[tag];
+    async set(key) {
+        this.dataKey = key;
+        await idb.set('dataKey', key);
     }
+
 }
