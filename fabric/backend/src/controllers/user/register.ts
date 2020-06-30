@@ -5,9 +5,13 @@ export const register: PostHandler<{}, { id: string }> = async (req, res, next) 
     try {
         const { id, ...others } = req.body;
         const contract = await getContract('admin');
+        const result = await contract.submitTransaction('getIdentity', id);
+        if (result.length) {
+            return res.json({ ok: false, payload: { message: '用户已存在' } });
+        }
         await contract.submitTransaction('setIdentity', id, JSON.stringify(others));
-        res.json({ ok: true });
+        return res.json({ ok: true });
     } catch (e) {
-        next(e);
+        return next(e);
     }
 };
