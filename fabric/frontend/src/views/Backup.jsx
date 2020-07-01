@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, Typography } from '@material-ui/core';
-import { useStores } from '../hooks/useStores';
-import TextField from '@material-ui/core/TextField';
+import { observer } from 'mobx-react';
+import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { Redirect } from '@reach/router';
 
-export const Backup = () => {
-    const { identityStore, keyStore } = useStores();
+import { useStores } from '../hooks/useStores';
+import { useUserData } from '../hooks/useUserData';
+
+export const Backup = observer(() => {
+    const { identityStore, userDataStore } = useStores();
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }
+    useUserData();
     const [checked, setChecked] = useState({});
 
     const handleCheck = (event) => {
-        setChecked((prevChecked) => ({ ...prevChecked, [event.target.name]: event.target.checked }));
+        const { name, checked } = event.target;
+        setChecked((prevChecked) => ({ ...prevChecked, [name]: checked }));
     };
     return (
         <Card>
@@ -26,7 +30,7 @@ export const Backup = () => {
                     label='恢复手段'
                     fullWidth
                 />
-                {Object.keys(keyStore.dataKey).map((tag) => <FormControlLabel
+                {Object.keys(userDataStore.dataGroupedByTag).map((tag) => <FormControlLabel
                     control={<Checkbox checked={!!checked[tag]} onChange={handleCheck} name={tag} />}
                     label={tag}
                     key={tag}
@@ -37,4 +41,4 @@ export const Backup = () => {
             </CardActions>
         </Card>
     );
-};
+});

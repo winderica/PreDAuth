@@ -1,15 +1,13 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
 import { Button } from '@material-ui/core';
 import { Redirect } from '@reach/router';
 
 import { useStyles } from '../styles/data';
-import { useStores } from '../hooks/useStores';
-import { AliceContext } from '../contexts';
 import { Table } from '../components/Table';
-import { API } from '../constants';
-import { random } from '../utils/random';
-import { sign } from '../utils/ecdsa';
+import { useAlice } from '../hooks/useAlice';
+import { useStores } from '../hooks/useStores';
+import { useUserData } from '../hooks/useUserData';
 
 export const Data = observer(() => {
     const classes = useStyles();
@@ -17,46 +15,16 @@ export const Data = observer(() => {
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }
-    const alice = useContext(AliceContext);
-    useEffect(() => {
-        (async () => {
-            if (userDataStore.todo) {
-                await userDataStore.fetch(identityStore.id, alice, keyStore.dataKey);
-                userDataStore.error
-                    ? notificationStore.enqueueError(userDataStore.message)
-                    : notificationStore.enqueueSuccess('已成功恢复数据');
-            }
-        })();
-    }, []);
+    const alice = useAlice();
+    useUserData();
     const handleEncrypt = async () => {
-        const data = userDataStore.dataGroupedByTag;
-        const encrypted = {};
-        const dataKey = {};
-        await Promise.all(Object.keys(data).map(async (tag) => {
-            const { pk, sk } = alice.key();
-            dataKey[tag] = { pk, sk };
-            encrypted[tag] = await alice.encrypt(JSON.stringify(data[tag]), pk);
-        }));
-        await keyStore.set(dataKey);
-        const nonce = random(32);
-        const signature = await sign(nonce, identityStore.key);
-        const { ok, payload } = await (await fetch(API.data(identityStore.id), {
-            method: 'POST',
-            body: JSON.stringify({
-                nonce,
-                signature,
-                payload: encrypted
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })).json();
-        notificationStore.enqueueSnackbar({
-            message: ok ? '成功加密并提交' : payload.message,
-            options: {
-                variant: ok ? 'success' : 'error',
-            },
-        });
+        const dataKey = await userDataStore.submit(identityStore.id, identityStore.key, alice);
+        if (userDataStore.error) {
+            notificationStore.enqueueError(userDataStore.message);
+        } else {
+            await keyStore.set(dataKey);
+            notificationStore.enqueueSuccess('成功加密并提交');
+        }
     };
     return (
         <div className={classes.container}>

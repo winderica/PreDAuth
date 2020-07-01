@@ -12,8 +12,8 @@ import { Redirect } from '@reach/router';
 export const Register = observer(() => {
     const { identityStore, notificationStore } = useStores();
     const [id, setId] = useState('');
-    const handleInput = (event) => {
-        setId(event.target.value);
+    const handleInput = ({ target: { value } }) => {
+        setId(value);
     };
     const handleSubmit = async () => {
         const key = await generateKey();

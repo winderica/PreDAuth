@@ -1,5 +1,7 @@
 import { action, computed, observable } from 'mobx';
 import { API, STATE } from '../constants';
+import { random } from '../utils/random';
+import { sign } from '../utils/ecdsa';
 
 export class UserDataStore {
     @observable
@@ -32,6 +34,40 @@ export class UserDataStore {
             this.state = STATE.error;
             this.message = e.message;
         }
+    }
+
+    @action
+    async submit(id, key, alice) {
+        this.state = STATE.pending;
+        const data = this.dataGroupedByTag;
+        const encrypted = {};
+        const dataKey = {};
+        await Promise.all(Object.keys(data).map(async (tag) => {
+            const { pk, sk } = alice.key();
+            dataKey[tag] = { pk, sk };
+            encrypted[tag] = await alice.encrypt(JSON.stringify(data[tag]), pk);
+        }));
+        const nonce = random(32);
+        const signature = await sign(nonce, key);
+        const { ok, payload } = await (await fetch(API.data(id), {
+            method: 'POST',
+            body: JSON.stringify({
+                nonce,
+                signature,
+                payload: encrypted
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })).json();
+        if (!ok) {
+            this.state = STATE.error;
+            this.message = payload.message;
+            return {};
+        }
+        this.state = STATE.done;
+        this.message = '';
+        return dataKey;
     }
 
     @action
