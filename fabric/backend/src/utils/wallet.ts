@@ -8,7 +8,7 @@ const getWallet = async () => {
     return await Wallets.newFileSystemWallet(walletPath);
 };
 
-export const getContract = async (id: string) => {
+export const getContract = async (id: string, config = ccp) => {
     const wallet = await getWallet();
     const user = await wallet.get(id);
     if (!user) {
@@ -16,7 +16,7 @@ export const getContract = async (id: string) => {
     }
 
     const gateway = new Gateway();
-    await gateway.connect(ccp, {
+    await gateway.connect(config, {
         wallet,
         identity: id,
         discovery: {
