@@ -3,7 +3,7 @@ import { GetHandler } from '@constants/types';
 
 export const getGenerators: GetHandler = async (_req, res, next) => {
     try {
-        const contract = await getContract('admin');
+        const contract = await getContract('admin1');
         const result = await contract.evaluateTransaction('getGH');
         res.json({
             ok: true,

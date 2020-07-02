@@ -1,15 +1,16 @@
+import { readFileSync } from 'fs';
+import { createServer } from 'https';
 import express, { json, urlencoded } from 'express';
 import cors from 'cors';
-import fs from 'fs';
 import helmet from 'helmet';
-import https from 'https';
+
 import { routes } from './routes';
 import { errorHandler } from '@middlewares/errorHandler';
 import { errorLogger, infoLogger, warnLogger } from '@middlewares/accessLogger';
 import { addAdmin } from '@utils/wallet';
 
 (async (hostname, port) => {
-    await addAdmin();
+    await Promise.all([1, 2].map(addAdmin));
     const app = express();
     app.use(helmet());
     app.use(urlencoded({ extended: true }));
@@ -21,11 +22,10 @@ import { addAdmin } from '@utils/wallet';
     app.use(routes);
     app.use(errorHandler);
 
-    const httpsServer = https.createServer({
-        key: fs.readFileSync('./assets/key.pem'),
-        cert: fs.readFileSync('./assets/cert.pem'),
-    }, app);
-    httpsServer.listen(port, hostname, () => {
+    createServer({
+        key: readFileSync('./assets/key.pem'),
+        cert: readFileSync('./assets/cert.pem'),
+    }, app).listen(port, hostname, () => {
         console.log(`Listening on ${hostname}:${port}`);
     });
 })('0.0.0.0', 4000);

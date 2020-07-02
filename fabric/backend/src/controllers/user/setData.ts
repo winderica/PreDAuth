@@ -4,7 +4,7 @@ import { PostHandler } from '@constants/types';
 export const setData: PostHandler<{ id: string }> = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const contract = await getContract('admin');
+        const contract = await getContract('admin1');
         await contract.submitTransaction('setData', id, JSON.stringify(req.body));
         res.json({ ok: true });
     } catch (e) {
