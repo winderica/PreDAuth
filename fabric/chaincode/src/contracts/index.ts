@@ -1,8 +1,10 @@
 import { Context, Contract } from 'fabric-contract-api';
-import { G1, G2, Fr, PRE } from '../utils/pre';
+import { Fr, G1, G2, PRE } from '../utils/pre';
 import { BackupLedger, DataLedger, IdentityLedger } from '../ledger';
 import { verify } from '../utils/ecdsa';
 import { AES } from '../utils/aes';
+import { CodeLedger } from '../ledger/code';
+import { randomCode } from '../utils/code';
 
 interface Request<T> {
     nonce: string;
@@ -46,12 +48,14 @@ class PreDAuthContext extends Context {
     data: DataLedger;
     identity: IdentityLedger;
     backup: BackupLedger;
+    code: CodeLedger;
 
     constructor() {
         super();
         this.data = new DataLedger(this);
         this.identity = new IdentityLedger(this);
         this.backup = new BackupLedger(this);
+        this.code = new CodeLedger(this);
     }
 }
 
@@ -118,7 +122,7 @@ export class PreDAuth extends Contract {
     }
 
     async getData(ctx: PreDAuthContext, id: string) {
-        return ctx.data.get([id]);
+        return await ctx.data.get([id]);
     }
 
     async setData(ctx: PreDAuthContext, id: string, request: string) {
@@ -143,7 +147,7 @@ export class PreDAuth extends Contract {
         if (!verify(nonce, await this.getIdentity(ctx, id), signature)) {
             throw new Error('Verification failed');
         }
-        await ctx.backup.set([id], JSON.stringify({ rk, email }));
+        await ctx.backup.set([id], JSON.stringify({ rk, email })); // TODO: store rk in ledgers may cause unexpected behaviour
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
@@ -152,18 +156,21 @@ export class PreDAuth extends Contract {
         if (email !== payload.email) {
             throw new Error('Verification failed');
         }
+        const code = randomCode();
+        await ctx.code.set([id], JSON.stringify({ code, time: Date.now() })); // TODO: store code in ledgers may cause unexpected behaviour
         // TODO: send verification code
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<Recover> = JSON.parse(request);
-        if (payload.code) {
-            // TODO: verify payload
+        const { code, time } = JSON.parse(await ctx.code.get([id]));
+        if (payload.code !== code || Date.now() - time > 1000 * 60 * 10) {
+            throw new Error('Verification failed');
         }
         const { rk }: Backup = JSON.parse(await ctx.backup.get([id]));
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
-        return JSON.stringify(
+        return JSON.stringify( // TODO: encrypt decrypted data using user's new publicKey
             reEncrypted.map(({ data, key, iv }) => this.handleReDecrypt(data, key, iv))
         );
     }
