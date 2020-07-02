@@ -4,9 +4,10 @@
   "license": "MIT",
   "main": "./index.js",
   "dependencies": {
-    "fabric-contract-api": "^2.1.1",
-    "fabric-shim": "^2.1.1",
-    "mcl": "file:./mcl"
+    "fabric-contract-api": "^2.2.0",
+    "fabric-shim": "^2.2.0",
+    "mcl": "file:./mcl",
+    "nodemailer": "^6.4.10"
   },
   "scripts": {
     "start": "fabric-chaincode-node start"
