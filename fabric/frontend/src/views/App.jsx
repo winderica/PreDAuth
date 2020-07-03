@@ -11,6 +11,7 @@ import { Backup } from './Backup';
 import { Data } from './Data';
 import { Home } from './Home';
 import { Register } from './Register';
+import { Recover } from './Recover';
 
 export const App = () => {
     useStyles();
@@ -26,6 +27,7 @@ export const App = () => {
                                 <Auth path='/auth' />
                                 <Backup path='/backup' />
                                 <Register path='/register' />
+                                <Recover path='/recover' />
                             </Router>
                         </AliceProvider>
                     </Frame>
