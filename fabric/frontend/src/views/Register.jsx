@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
+import { observer } from 'mobx-react';
 import { Button, TextField, Typography } from '@material-ui/core';
+import { Redirect } from '@reach/router';
 
 import { Dialog } from '../components/Dialog';
 import { useStores } from '../hooks/useStores';
 import { exportPublicKey, generateKey, sign } from '../utils/ecdsa';
 import { random } from '../utils/random';
 import { API } from '../constants';
-import { observer } from 'mobx-react';
-import { Redirect } from '@reach/router';
 
 export const Register = observer(() => {
     const { identityStore, notificationStore } = useStores();
@@ -20,9 +20,9 @@ export const Register = observer(() => {
         const publicKey = await exportPublicKey(key);
         const nonce = random(32);
         const signature = await sign(nonce, key);
-        const { ok, payload } = await (await fetch(API.register, {
+        const { ok, payload } = await (await fetch(API.register(id), {
             method: 'POST',
-            body: JSON.stringify({ id, nonce, signature, payload: { publicKey } }),
+            body: JSON.stringify({ nonce, signature, payload: { publicKey } }),
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -38,8 +38,9 @@ export const Register = observer(() => {
             },
         });
     };
-    return identityStore.id ? <Redirect to='/' noThrow /> : (
-        <Dialog
+    return identityStore.id
+        ? <Redirect to='/' noThrow />
+        : <Dialog
             open={true}
             setOpen={() => undefined}
             title='初始化'
@@ -59,6 +60,5 @@ export const Register = observer(() => {
             actions={<>
                 <Button color='primary' onClick={handleSubmit}>提交</Button>
             </>}
-        />
-    );
+        />;
 });
