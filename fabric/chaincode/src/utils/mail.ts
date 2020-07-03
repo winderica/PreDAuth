@@ -1,8 +1,8 @@
-import { createTestAccount, createTransport, SendMailOptions } from 'nodemailer';
+import { createTestAccount, createTransport, getTestMessageUrl, SendMailOptions } from 'nodemailer';
 
 export const mailto = async ({ text, to, from, subject }: SendMailOptions) => {
     const { user, pass } = await createTestAccount();
-    await createTransport({
+    const res = await createTransport({
         host: 'smtp.ethereal.email',
         port: 587,
         secure: false,
@@ -17,4 +17,5 @@ export const mailto = async ({ text, to, from, subject }: SendMailOptions) => {
         text,
         html: `<b>${text as string}</b>`,
     });
+    console.log(getTestMessageUrl(res));
 };
