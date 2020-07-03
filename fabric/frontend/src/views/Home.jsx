@@ -19,7 +19,7 @@ export const Home = observer(() => {
                 <Link to='/register'>
                     <Button color='primary'>初次使用</Button>
                 </Link>
-                <Link to='relative'>
+                <Link to='/recover'>
                     <Button color='primary'>找回数据</Button>
                 </Link>
             </>}
