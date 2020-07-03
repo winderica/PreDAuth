@@ -1,12 +1,19 @@
 import { getContract } from '@utils/wallet';
-import { GetHandler } from '@constants/types';
+import { PostHandler } from '@constants/types';
 
-export const verifyCode: GetHandler<{ id: string }> = async (req, res, next) => {
+export const verifyCode: PostHandler<{ id: string }> = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const contract = await getContract('admin1'); // TODO: multiple peers
-        const result = await contract.evaluateTransaction('recover', id, JSON.stringify(req.body));
-        res.json({ ok: true, payload: JSON.parse(result.toString('utf8') || '{}') });
+        res.json({
+            ok: true,
+            payload: {
+                data: await Promise.all([1, 2].map(async (org) => {
+                    const contract = await getContract(`admin${org}`);
+                    const result = await contract.evaluateTransaction('recover', id, JSON.stringify(req.body));
+                    return JSON.parse(result.toString('utf8') || '{}').data;
+                }))
+            }
+        });
     } catch (e) {
         next(e);
     }
