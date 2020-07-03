@@ -9,6 +9,8 @@ import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { useUrlParams } from '../hooks/useUrlParams';
+import { random } from '../utils/random';
+import { sign } from '../utils/ecdsa';
 
 const AuthGetting = observer(() => {
     const { identityStore, keyStore, userDataStore } = useStores();
@@ -16,13 +18,19 @@ const AuthGetting = observer(() => {
     const alice = useAlice();
     const [checked, setChecked] = useState({});
     const handleAuth = async () => {
+        const nonce = random(32);
+        const signature = await sign(nonce, identityStore.key);
         const data = {};
         Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
             data[tag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
         });
         await fetch(API.reEncrypt(identityStore.id, request.callback), {
             method: 'POST',
-            body: JSON.stringify(data),
+            body: JSON.stringify({
+                nonce,
+                signature,
+                payload: data
+            }),
             headers: {
                 'Content-Type': 'application/json'
             }
