@@ -9,7 +9,7 @@ export const reEncrypt: GetHandler<{ id: string; to: string }> = async (req, res
         const result = await contract.evaluateTransaction('reEncrypt', id, JSON.stringify(req.body));
         const json = JSON.parse(result.toString('utf8'));
         await got.post(to, { json });
-        res.json(json);
+        res.json({ ok: true });
     } catch (e) {
         next(e);
     }
