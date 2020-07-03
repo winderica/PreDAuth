@@ -1,27 +1,33 @@
 {
-  "name": "app-backend",
+  "name": "fabric-backend",
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "fabric-ca-client": "^2.1.0",
-    "fabric-network": "^2.1.0",
-    "node-fetch": "^2.6.0"
+    "fabric-network": "^2.1.1-snapshot.367",
+    "got": "^11.1.4",
+    "helmet": "^3.22.0",
+    "morgan": "^1.10.0",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.6",
-    "@types/node": "^13.13.0",
-    "@types/node-fetch": "^2.5.7",
-    "@typescript-eslint/eslint-plugin": "^2.28.0",
-    "@typescript-eslint/parser": "^2.28.0",
-    "eslint": "^6.8.0",
-    "ts-node": "^8.9.0",
-    "typescript": "^3.8.3"
+    "@types/helmet": "^0.0.47",
+    "@types/morgan": "^1.9.0",
+    "@types/node": "^14.0.1",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "eslint": "^7.0.0",
+    "ts-node": "^8.10.1",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^3.9.2"
   },
   "scripts": {
     "build": "tsc",
-    "start": "./scripts/start.sh && ts-node src/main.ts"
+    "start": "./scripts/start.sh && ts-node -r ./bootstrap.ts src/main.ts",
+    "start:prod": "cd ./dist && NODE_ENV=production node -r ./bootstrap.js src/main.js"
   }
 }

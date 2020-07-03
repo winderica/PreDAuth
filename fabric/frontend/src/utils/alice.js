@@ -1,5 +1,3 @@
-import Crypto from 'crypto-js';
-
 export class Alice {
     constructor(pre, g, h) {
         this.pre = pre;
@@ -19,32 +17,58 @@ export class Alice {
         return this.pre.serialize(this.pre.reKeyGen(this.pre.deserialize(sk, 'Fr'), this.pre.deserialize(bobPK, 'G2')));
     }
 
-    encrypt(plaintext, pk) {
+    async encrypt(plaintext, pk) {
         const aesKey = this.pre.randomGen();
-        const iv = Crypto.lib.WordArray.random(16);
-        const data = Crypto.AES.encrypt(plaintext, Crypto.enc.Hex.parse(aesKey), {
-            iv,
-            mode: Crypto.mode.CBC
-        }).toString();
+        const key = await crypto.subtle.importKey(
+            'raw',
+            new Uint8Array(aesKey.match(/.{1,2}/g).map(byte => parseInt(byte, 16))),
+            {
+                name: 'AES-CBC',
+            },
+            false,
+            ['encrypt', 'decrypt']
+        );
+        const iv = crypto.getRandomValues(new Uint8Array(16));
+        const data = await crypto.subtle.encrypt(
+            {
+                name: 'AES-CBC',
+                iv
+            },
+            key,
+            new TextEncoder().encode(plaintext)
+        );
         const { ca0, ca1 } = this.pre.encrypt(aesKey, this.pre.deserialize(pk, 'G1'), this._g, this._h);
         return {
-            data,
+            data: btoa(String.fromCharCode(...new Uint8Array(data))),
             key: {
                 ca0: this.pre.serialize(ca0),
                 ca1: this.pre.serialize(ca1),
             },
-            iv: iv.toString(),
+            iv: iv.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), ''),
         };
     }
 
-    decrypt({ data, key: { ca0, ca1 }, iv }, sk) {
+    async decrypt({ data, key: { ca0, ca1 }, iv }, sk) {
         const aesKey = this.pre.decrypt({
             ca0: this.pre.deserialize(ca0, 'Fr'),
             ca1: this.pre.deserialize(ca1, 'G1')
         }, this.pre.deserialize(sk, 'Fr'), this._h);
-        return Crypto.AES.decrypt(data, Crypto.enc.Hex.parse(aesKey), {
-            iv: Crypto.enc.Hex.parse(iv),
-            mode: Crypto.mode.CBC
-        }).toString(Crypto.enc.Utf8);
+        const key = await crypto.subtle.importKey(
+            'raw',
+            new Uint8Array(aesKey.match(/.{1,2}/g).map(byte => parseInt(byte, 16))),
+            {
+                name: 'AES-CBC',
+            },
+            false,
+            ['encrypt', 'decrypt']
+        );
+        return new TextDecoder().decode(await crypto.subtle.decrypt(
+            {
+                name: 'AES-CBC',
+                iv: new Uint8Array(iv.match(/.{1,2}/g).map(byte => parseInt(byte, 16))),
+            },
+            key,
+            Uint8Array.from([...atob(data)].map(i => i.charCodeAt(0)))
+        ));
     }
 }

@@ -12,6 +12,10 @@ export class PRE {
         };
     }
 
+    pairing(g, h) {
+        return this.mcl.pairing(g, h);
+    }
+
     keyGenInG1(g, sk) {
         sk = sk ? this.mcl.deserializeHexStrToFr(sk) : this.randomInFr(); // SKa = a is randomly selected from Fr
         const pk = this.mcl.mul(g, sk); // PKa = g^SKa = g^a

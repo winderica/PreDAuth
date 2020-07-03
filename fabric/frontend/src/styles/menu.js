@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles(({ transitions, mixins, spacing, breakpoints }) => ({
+export const useStyles = makeStyles(({ transitions, mixins, spacing/*, breakpoints*/ }) => ({
     drawerPaper: ({ open }) => ({
         position: 'sticky',
         overflowX: 'hidden',
@@ -9,10 +9,10 @@ export const useStyles = makeStyles(({ transitions, mixins, spacing, breakpoints
             easing: transitions.easing.sharp,
             duration: open ? transitions.duration.enteringScreen : transitions.duration.leavingScreen,
         }),
-        [breakpoints.down('sm')]: open ? {} : {
-            border: 0,
-            width: 0,
-        },
+        // [breakpoints.down('sm')]: open ? {} : {
+        //     border: 0,
+        //     width: 0,
+        // },
     }),
     toolbar: {
         display: 'flex',

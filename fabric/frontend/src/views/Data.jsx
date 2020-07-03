@@ -1,51 +1,41 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react';
 import { Button } from '@material-ui/core';
+import { Redirect } from '@reach/router';
 
 import { useStyles } from '../styles/data';
-import { useStores } from '../hooks/useStores';
-import { AliceContext } from '../contexts';
 import { Table } from '../components/Table';
-import { API } from '../constants';
+import { useAlice } from '../hooks/useAlice';
+import { useStores } from '../hooks/useStores';
+import { useUserData } from '../hooks/useUserData';
 
 export const Data = observer(() => {
     const classes = useStyles();
-    const { userDataStore, identityStore, keyStore } = useStores();
-    const alice = useContext(AliceContext);
-    useEffect(() => {
-        (async () => {
-            const { payload } = await (await fetch(API.data(identityStore.id))).json();
-            Object.entries(payload).forEach(([tag, data]) => {
-               Object.entries(JSON.parse(alice.decrypt(data, keyStore.key[tag].sk))).map(([key, value]) => userDataStore.set(key, value, tag));
-            });
-        })();
-    }, []);
+    const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
+    if (!identityStore.id) {
+        return <Redirect to='/' noThrow />;
+    }
+    const alice = useAlice();
+    useUserData();
     const handleEncrypt = async () => {
-        const data = userDataStore.dataGroupedByTag;
-        const encrypted = {};
-        Object.keys(data).forEach((tag) => {
-            const { pk, sk } = alice.key();
-            keyStore.set(tag, { pk, sk });
-            encrypted[tag] = alice.encrypt(JSON.stringify(data[tag]), pk);
-        });
-        await fetch(API.data(identityStore.id), {
-            method: 'POST',
-            body: JSON.stringify(encrypted),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const dataKey = await userDataStore.submit(identityStore.id, identityStore.key, alice);
+        if (userDataStore.error) {
+            notificationStore.enqueueError(userDataStore.message);
+        } else {
+            await keyStore.set(dataKey);
+            notificationStore.enqueueSuccess('成功加密并提交');
+        }
     };
     return (
         <div className={classes.container}>
             <Table
                 columns={[
-                    { title: 'key', field: 'key', grouping: false },
-                    { title: 'value', field: 'value', grouping: false },
-                    { title: 'tag', field: 'tag' },
+                    { title: '键', field: 'key', grouping: false },
+                    { title: '值', field: 'value', grouping: false },
+                    { title: '标签', field: 'tag' },
                 ]}
-                title='Personal information'
-                data={userDataStore.dataArray}
+                title='个人信息'
+                data={userDataStore.dataArray.filter(i => i.tag !== '重要')}
                 editable={{
                     onRowDelete: async ({ key }) => userDataStore.del(key),
                     onRowAdd: async ({ key, value, tag }) => userDataStore.set(key, value, tag),
@@ -61,7 +51,7 @@ export const Data = observer(() => {
                 color='primary'
                 className={classes.button}
             >
-                encrypt
+                加密并提交
             </Button>
         </div>
     );

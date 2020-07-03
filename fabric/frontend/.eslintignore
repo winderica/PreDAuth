@@ -1,4 +1,6 @@
 node_modules
 webpack.config.js
+.eslintrc.js
 config
 scripts
+build

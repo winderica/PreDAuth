@@ -2,10 +2,10 @@ import { PRE, Fr, G1, G2 } from './pre';
 import { AES } from './aes';
 
 export class Bob {
-    private readonly _g!: G1;
-    private readonly _h!: G2;
-    private readonly _sk!: Fr;
-    private readonly _pk!: G2;
+    private readonly _g: G1;
+    private readonly _h: G2;
+    private readonly _sk: Fr;
+    private readonly _pk: G2;
 
     constructor(private readonly pre: PRE, g: string, h: string) {
         this._g = this.pre.deserialize(g, 'G1');

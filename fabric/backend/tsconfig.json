@@ -8,6 +8,27 @@
       "typings",
       "node_modules/@types"
     ],
+    "baseUrl": ".",
+    "paths": {
+      "@assets/*": [
+        "assets/*"
+      ],
+      "@constants/*": [
+        "src/constants/*"
+      ],
+      "@controllers/*": [
+        "src/controllers/*"
+      ],
+      "@middlewares/*": [
+        "src/middlewares/*"
+      ],
+      "@routes/*": [
+        "src/routes/*"
+      ],
+      "@utils/*": [
+        "src/utils/*"
+      ]
+    },
     "outDir": "dist",
     "pretty": true,
     "module": "CommonJS",
@@ -16,7 +37,6 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "strict": true,
-    "skipLibCheck": true,
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,

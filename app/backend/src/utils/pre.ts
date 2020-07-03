@@ -4,8 +4,10 @@ export { Fr, G1, G2, GT };
 
 export class PRE {
     mcl!: Mcl;
+    g!: G1;
+    h!: G2;
 
-    async init(curve = BLS12_381) {
+    async init(curve: number = BLS12_381) {
         this.mcl = await init(curve);
     }
 
@@ -14,6 +16,10 @@ export class PRE {
             g: fromHex ? this.mcl.deserializeHexStrToG1(g) : this.mcl.hashAndMapToG1(g),
             h: fromHex ? this.mcl.deserializeHexStrToG2(h) : this.mcl.hashAndMapToG2(h)
         };
+    }
+
+    pairing(g: G1, h: G2) {
+        return this.mcl.pairing(g, h);
     }
 
     keyGenInG1(g: G1) {
@@ -28,11 +34,11 @@ export class PRE {
         return { sk, pk };
     }
 
-    encrypt(plain: string, pk: G1, g: G1, h: G2) {
+    encrypt(plain: string, pk: G1, z: GT) {
         const r = this.randomInFr(); // r is randomly selected from Fr
 
         const m = this.mcl.deserializeHexStrToFr(plain);
-        const z = this.mcl.pairing(g, h); // Z = e(g, h)
+        // const z = this.z; // Z = e(g, h)
         const ca0 = this.mcl.add(m, this.mcl.hashToFr(this.mcl.pow(z, r).serialize())); // Ca0 = m*Z^r
 
         const ca1 = this.mcl.mul(pk, r); // Ca1 = PKa^r = g^(ra)

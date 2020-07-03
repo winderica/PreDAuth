@@ -9,9 +9,11 @@ module.exports = {
     rules: {
         quotes: ['warn', 'single', { avoidEscape: true }],
         semi: ['warn', 'always'],
-        'react/prop-types': ['off']
+        'react/prop-types': ['off'],
+        'jsx-quotes': ['warn', 'prefer-single']
     },
     env: {
-        'browser': true
+        'browser': true,
+        'es6': true
     }
 };

@@ -1,46 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { SnackbarProvider } from 'notistack';
 import { ThemeProvider } from '@material-ui/core';
+import { LocationProvider, Router } from '@reach/router';
 
 import { AliceProvider } from '../providers/alice';
-import { LocationProvider, Router } from '@reach/router';
-import { Data } from './Data';
-import { useStores } from '../hooks/useStores';
 import { Frame } from '../components/Frame';
 import { theme, useStyles } from '../styles/global';
 import { Auth } from './Auth';
-import { API } from '../constants';
-
-const id = 'alice';
+import { Backup } from './Backup';
+import { Data } from './Data';
+import { Home } from './Home';
+import { Register } from './Register';
+import { Recover } from './Recover';
 
 export const App = () => {
     useStyles();
-    const { identityStore } = useStores();
-    const [initialized, setInitialized] = useState(false);
-    useEffect(() => {
-        (async () => {
-            await fetch(API.register, {
-                method: 'POST',
-                body: JSON.stringify({ id }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            identityStore.set(id);
-            setInitialized(true);
-        })();
-    }, []);
-    return initialized && (
-        <LocationProvider>
-            <ThemeProvider theme={theme}>
-                <AliceProvider>
+    return (
+        <SnackbarProvider>
+            <LocationProvider>
+                <ThemeProvider theme={theme}>
                     <Frame>
-                        <Router>
-                            <Data path='/data' />
-                            <Auth path='/auth' />
-                        </Router>
+                        <AliceProvider>
+                            <Router>
+                                <Home path='/' />
+                                <Data path='/data' />
+                                <Auth path='/auth' />
+                                <Backup path='/backup' />
+                                <Register path='/register' />
+                                <Recover path='/recover' />
+                            </Router>
+                        </AliceProvider>
                     </Frame>
-                </AliceProvider>
-            </ThemeProvider>
-        </LocationProvider>
+                </ThemeProvider>
+            </LocationProvider>
+        </SnackbarProvider>
     );
 };

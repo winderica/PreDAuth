@@ -1,36 +1,10 @@
 import { Router } from 'express';
-import { getContract } from '../utils/wallet';
-import fetch from 'node-fetch';
+import { getGenerators, getPKs, reEncrypt } from '@controllers/auth';
 
 export const auth = Router();
 
-auth.get('/generators/:id', async (req, res, next) => {
-    try {
-        const contract = await getContract(req.params.id);
-        const result = await contract.evaluateTransaction('getGH');
-        res.json({
-            ok: true,
-            payload: JSON.parse(result.toString('utf8')),
-        });
-    } catch (e) {
-        next(e);
-    }
-});
+auth.get('/generators', getGenerators);
 
-auth.post('/reEncrypt/:id/:to', async (req, res, next) => {
-    try {
-        const { id, to } = req.params;
-        const contract = await getContract(id);
-        const result = await contract.evaluateTransaction('reEncrypt', id, JSON.stringify(req.body));
-        await fetch(to, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: result.toString('utf8')
-        });
-        res.json(JSON.parse(result.toString('utf8')));
-    } catch (e) {
-        next(e);
-    }
-});
+auth.get('/pks', getPKs);
+
+auth.post('/reEncrypt/:id/:to', reEncrypt);

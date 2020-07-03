@@ -1,23 +1,31 @@
+import { readFileSync } from 'fs';
+import { createServer } from 'https';
 import express, { json, urlencoded } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+
 import { routes } from './routes';
-import { errorHandler } from './middlewares/errorHandler';
-import { addAdmin } from './utils/wallet';
+import { errorHandler } from '@middlewares/errorHandler';
+import { errorLogger, infoLogger, warnLogger } from '@middlewares/accessLogger';
+import { addAdmin } from '@utils/wallet';
 
-(async (hostname = '0.0.0.0', port = 4000) => {
-    try {
-        await addAdmin();
-        const app = express();
-        app.use(urlencoded({ extended: true }));
-        app.use(json());
-        app.use(cors());
-        app.use(routes);
-        app.use(errorHandler);
+(async (hostname, port) => {
+    await Promise.all([1, 2].map(addAdmin));
+    const app = express();
+    app.use(helmet());
+    app.use(urlencoded({ extended: true }));
+    app.use(json());
+    app.use(cors());
+    app.use(infoLogger);
+    app.use(warnLogger);
+    app.use(errorLogger);
+    app.use(routes);
+    app.use(errorHandler);
 
-        app.listen(port, hostname, () => {
-            console.log(`Listening on ${hostname}:${port}`);
-        });
-    } catch (e) {
-        console.log(e);
-    }
-})();
+    createServer({
+        key: readFileSync('./assets/key.pem'),
+        cert: readFileSync('./assets/cert.pem'),
+    }, app).listen(port, hostname, () => {
+        console.log(`Listening on ${hostname}:${port}`);
+    });
+})('0.0.0.0', 4000);
