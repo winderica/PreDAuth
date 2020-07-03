@@ -1,8 +1,8 @@
 import { Context } from 'fabric-contract-api';
 import { StateLedger } from './state';
 
-export class BackupLedger extends StateLedger {
+export class RecoveryLedger extends StateLedger {
     constructor(ctx: Context) {
-        super(ctx, 'backupLedger');
+        super(ctx, 'recoveryLedger');
     }
 }
