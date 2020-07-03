@@ -1,6 +1,5 @@
 CHANNEL_NAME="$1"
-VERSION="$2"
-CHAINCODE_NAME="$3"
+CHAINCODE_NAME="$2"
 
 export FABRIC_CFG_PATH=${PWD}/config
 export CORE_PEER_TLS_ENABLED=true
@@ -58,6 +57,11 @@ commitChaincodeDefinition() {
   peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" $PEER_CONN_PARMS --version "${VERSION}" --sequence "${VERSION}" --init-required
 }
 
+getVersion() {
+  setGlobals "$1"
+  VERSION=$(($(peer lifecycle chaincode querycommitted --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" 2>&1 | grep -oP "Version: \K(\d+)") + 1))
+}
+
 queryCommitted() {
   setGlobals "$1"
   peer lifecycle chaincode querycommitted --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME"
@@ -75,6 +79,7 @@ chaincodeInvokeInit() {
   peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" -C "$CHANNEL_NAME" -n "$CHAINCODE_NAME" $PEER_CONN_PARMS --isInit -c '{"function":"init","Args":["aaaa", "bbbb"]}'
 }
 
+getVersion 1
 packageChaincode 1
 installChaincode 1
 installChaincode 2

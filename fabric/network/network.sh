@@ -45,7 +45,7 @@ function createChannel() {
 }
 
 function deployCC() {
-  scripts/deployCC.sh "$CHANNEL_NAME" "$VERSION" "$CHAINCODE_NAME"
+  scripts/deployCC.sh "$CHANNEL_NAME" "$CHAINCODE_NAME"
   exit 0
 }
 
@@ -63,7 +63,6 @@ function networkDown() {
 }
 
 CHANNEL_NAME="channel"
-VERSION=1
 CHAINCODE_NAME="chaincode"
 COMPOSE_FILE_BASE=docker/docker-compose-test-net.yaml
 COMPOSE_FILE_COUCH=docker/docker-compose-couch.yaml
@@ -89,10 +88,6 @@ while [[ $# -ge 1 ]]; do
   case $key in
   -c)
     CHANNEL_NAME="$2"
-    shift
-    ;;
-  -v)
-    VERSION="$2"
     shift
     ;;
   -n)
