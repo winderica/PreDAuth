@@ -1,22 +1,69 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, TextField, Typography } from '@material-ui/core';
 import { Redirect } from '@reach/router';
 
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
+import { API } from '../constants';
+import { useAlice } from '../hooks/useAlice';
+import { random } from '../utils/random';
+import { sign } from '../utils/ecdsa';
 
 export const Backup = observer(() => {
-    const { identityStore, userDataStore } = useStores();
+    const { identityStore, userDataStore, keyStore, notificationStore } = useStores();
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }
     useUserData();
     const [checked, setChecked] = useState({});
-
+    const [pks, setPKs] = useState([]);
+    const [email, setEmail] = useState('');
+    const alice = useAlice();
+    useEffect(() => {
+        (async () => {
+            const { ok, payload } = await (await fetch(API.getPKs)).json();
+            if (!ok) {
+                notificationStore.enqueueError(payload.message);
+                return;
+            }
+            setPKs(payload.pks);
+        })();
+    }, []);
     const handleCheck = (event) => {
         const { name, checked } = event.target;
         setChecked((prevChecked) => ({ ...prevChecked, [name]: checked }));
+    };
+    const handleInput = (event) => {
+        const { value } = event.target;
+        setEmail(value);
+    };
+    const handleBackup = async () => {
+        const nonce = random(32);
+        const signature = await sign(nonce, identityStore.key);
+        const data = {};
+        pks.map((pk) => {
+            const rk = {};
+            Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
+                rk[tag] = alice.reKey(pk, keyStore.dataKey[tag].sk);
+            });
+            data[pk] = {
+                rk,
+                email
+            };
+        });
+
+        await fetch(API.backup(identityStore.id), {
+            method: 'POST',
+            body: JSON.stringify({
+                nonce,
+                signature,
+                payload: data
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
     };
     return (
         <Card>
@@ -29,6 +76,8 @@ export const Backup = observer(() => {
                     margin='dense'
                     label='恢复手段'
                     fullWidth
+                    value={email}
+                    onChange={handleInput}
                 />
                 {Object.keys(userDataStore.dataGroupedByTag).map((tag) => <FormControlLabel
                     control={<Checkbox checked={!!checked[tag]} onChange={handleCheck} name={tag} />}
@@ -37,7 +86,7 @@ export const Backup = observer(() => {
                 />)}
             </CardContent>
             <CardActions>
-                <Button variant='contained' color='primary'>备份</Button>
+                <Button variant='contained' color='primary' onClick={handleBackup}>备份</Button>
             </CardActions>
         </Card>
     );
