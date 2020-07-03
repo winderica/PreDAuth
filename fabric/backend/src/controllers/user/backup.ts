@@ -4,8 +4,10 @@ import { PostHandler } from '@constants/types';
 export const backup: PostHandler<{ id: string }> = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const contract = await getContract('admin1'); // TODO: multiple peers
-        await contract.submitTransaction('backup', id, JSON.stringify(req.body));
+        await Promise.all([1, 2].map(async (org) => {
+            const contract = await getContract(`admin${org}`);
+            await contract.evaluateTransaction('backup', id, JSON.stringify(req.body));
+        }));
         res.json({ ok: true });
     } catch (e) {
         next(e);
