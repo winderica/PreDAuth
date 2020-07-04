@@ -25,7 +25,7 @@ packageChaincode() {
   setGlobals "$1"
   cd ../chaincode || exit
   yarn build
-  cd - > /dev/null || exit
+  cd - >/dev/null || exit
   peer lifecycle chaincode package "$CHAINCODE_NAME".tar.gz --path "../chaincode/dist/" --lang node --label "$CHAINCODE_NAME"_"${VERSION}"
 }
 
@@ -36,7 +36,7 @@ installChaincode() {
 
 approveForMyOrg() {
   setGlobals "$1"
-  PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | awk 'END{print $3}' | sed 's/.$//')
+  PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "$CHAINCODE_NAME"_"$VERSION" | awk '{print $3}' | sed 's/.$//')
   peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --init-required --package-id "${PACKAGE_ID}" --sequence "${VERSION}"
 }
 
