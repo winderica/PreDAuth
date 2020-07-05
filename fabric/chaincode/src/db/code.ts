@@ -1,7 +1,7 @@
 import { Code } from '../constants/types';
 
 export class CodeDB {
-    code: { [id: string]: Code } = {};
+    code: Record<string, Code> = {};
 
     set(id: string, data: Code) {
         this.code[id] = data;

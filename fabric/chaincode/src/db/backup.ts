@@ -1,7 +1,7 @@
 import { Backup } from '../constants/types';
 
 export class BackupDB {
-    backup: { [id: string]: Backup } = {};
+    backup: Record<string, Backup> = {};
 
     set(id: string, data: Backup) {
         this.backup[id] = data;
