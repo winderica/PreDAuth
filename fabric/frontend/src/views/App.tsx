@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { SnackbarProvider } from 'notistack';
 import { ThemeProvider } from '@material-ui/core';
 import { LocationProvider, Router } from '@reach/router';
@@ -13,7 +13,7 @@ import { Home } from './Home';
 import { Register } from './Register';
 import { Recover } from './Recover';
 
-export const App = () => {
+export const App: FC = () => {
     useStyles();
     return (
         <SnackbarProvider>

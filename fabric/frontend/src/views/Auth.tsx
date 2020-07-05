@@ -31,7 +31,7 @@ type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request }) => {
     const { identityStore, keyStore, userDataStore } = useStores();
     const alice = useAlice();
-    const [checked, setChecked] = useState<Record<string, boolean>>({});
+    const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
     const handleAuth = async () => {
         const data: Record<string, string> = {};
         Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
@@ -84,7 +84,7 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({request}) =
         }),
     );
     const handleAuth = async () => {
-        deltaDataStore.dataArray.map(({ key, value, tag }) => (userDataStore.set(key, value, tag)));
+        deltaDataStore.dataArray.forEach(({ key, value, tag }) => userDataStore.set(key, value, tag));
         const dataKey = await userDataStore.submit(identityStore.id, identityStore.key, alice);
         if (userDataStore.error) {
             notificationStore.enqueueError(userDataStore.message);

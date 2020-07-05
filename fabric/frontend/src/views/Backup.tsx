@@ -14,7 +14,7 @@ export const Backup = observer<FC<RouteComponentProps>>(() => {
         return <Redirect to='/' noThrow />;
     }
     useUserData();
-    const [checked, setChecked] = useState<Record<string, boolean>>({});
+    const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
     const [pks, setPKs] = useState<string[]>([]);
     const [email, setEmail] = useState('');
     const alice = useAlice();
