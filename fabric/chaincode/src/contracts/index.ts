@@ -42,21 +42,24 @@ export class PreDAuth extends Contract {
     }
 
     private handleReEncrypt(encrypted: Data, rk: RK) {
-        return Object.entries(rk).map(([tag, rk]) => {
+        return Object.fromEntries(Object.entries(rk).map(([tag, rk]) => {
             const { key: { ca0, ca1 }, data, iv } = encrypted[tag];
             const { cb0, cb1 } = this.pre.reEncrypt({
                 ca0: this.pre.deserialize(ca0, 'Fr'),
                 ca1: this.pre.deserialize(ca1, 'G1')
             }, this.pre.deserialize(rk, 'G2'));
-            return {
-                data,
-                key: {
-                    cb0: this.pre.serialize(cb0),
-                    cb1: this.pre.serialize(cb1),
-                },
-                iv,
-            };
-        });
+            return [
+                tag,
+                {
+                    data,
+                    key: {
+                        cb0: this.pre.serialize(cb0),
+                        cb1: this.pre.serialize(cb1),
+                    },
+                    iv,
+                }
+            ];
+        }));
     }
 
     private handleReDecrypt(cipher: string, { cb0, cb1 }: { cb0: string; cb1: string }, iv: string) {
@@ -134,7 +137,11 @@ export class PreDAuth extends Contract {
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
-        const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
+        const { nonce, signature, payload }: Request<{ codes: string[]; } & PK> = JSON.parse(request);
+        const publicKey = payload.publicKey;
+        if (!verify(nonce, publicKey, signature)) {
+            throw new Error('Verification failed');
+        }
         const { code, time } = this.codeDB.get(id);
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
@@ -144,8 +151,11 @@ export class PreDAuth extends Contract {
         const { rk } = this.backupDB.get(id);
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
+        await ctx.identity.set([id], payload.publicKey);
         return JSON.stringify({ // TODO: encrypt decrypted data using user's new publicKey
-            data: reEncrypted.map(({ data, key, iv }) => this.handleReDecrypt(data, key, iv))
+            data: Object.fromEntries(Object.entries(reEncrypted).map(([tag, { data, key, iv }]) =>
+                [tag, this.handleReDecrypt(data, key, iv)]
+            ))
         });
     }
 
