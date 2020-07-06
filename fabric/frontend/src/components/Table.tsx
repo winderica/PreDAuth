@@ -1,4 +1,5 @@
-import React, { PropsWithChildren } from 'react';
+import React, { FC } from 'react';
+import { observer } from 'mobx-react';
 import {
     AddBox,
     ArrowUpward,
@@ -16,7 +17,13 @@ import {
     Search,
     ViewColumn
 } from '@material-ui/icons';
-import MaterialTable, { MaterialTableProps } from 'material-table';
+import MaterialTable from 'material-table';
+import { UserDataStore } from '../stores';
+
+interface Props {
+    title: string;
+    dataStore: UserDataStore;
+}
 
 const tableIcons: any = {
     Add: AddBox,
@@ -38,10 +45,27 @@ const tableIcons: any = {
     ViewColumn
 };
 
-export const Table = <T extends Record<string, unknown>>(props: PropsWithChildren<MaterialTableProps<T>>) => {
+export const Table: FC<Props> = observer(({ title, dataStore }) => {
     return (
         <MaterialTable
+            title={title}
+            data={dataStore.dataArray}
+            columns={[
+                { title: '键', field: 'key', grouping: false },
+                { title: '值', field: 'value', grouping: false },
+                { title: '标签', field: 'tag' },
+            ]}
             icons={tableIcons}
+            editable={{
+                /* eslint-disable @typescript-eslint/require-await */
+                onRowDelete: async ({ key }) => dataStore.del(key),
+                onRowAdd: async ({ key, value, tag }) => dataStore.set(key, value, tag),
+                onRowUpdate: async ({ key, value, tag }, oldData) => {
+                    oldData && oldData.key !== key && dataStore.del(oldData.key);
+                    dataStore.set(key, value, tag);
+                }
+                /* eslint-enable @typescript-eslint/require-await */
+            }}
             options={{
                 search: false,
                 headerStyle: {
@@ -74,12 +98,10 @@ export const Table = <T extends Record<string, unknown>>(props: PropsWithChildre
                     previousTooltip: '前一页',
                     nextTooltip: '下一页',
                     labelDisplayedRows: '{from}到{to}行 共{count}行',
-                    labelRowsPerPage: 'bbb',
                     lastTooltip: '最后一页',
                     labelRowsSelect: '行每页',
                 }
             }}
-            {...props}
         />
     );
-};
+});

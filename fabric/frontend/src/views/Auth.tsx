@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FC, useState } from 'react';
-import { observer, useLocalStore } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Redirect, RouteComponentProps } from '@reach/router';
 import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 
@@ -9,6 +9,8 @@ import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { api } from '../api';
+import { Encrypted, PreKeyPair } from '../utils/alice';
+import { UserDataStore } from '../stores';
 
 interface AuthGettingRequest {
     type: 'get';
@@ -29,7 +31,7 @@ interface AuthSettingRequest {
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
 const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request }) => {
-    const { identityStore, keyStore, userDataStore } = useStores();
+    const { identityStore, keyStore, userDataStore, notificationStore, componentStateStore } = useStores();
     const alice = useAlice();
     const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
     const handleAuth = async () => {
@@ -37,7 +39,16 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
         Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
             data[tag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
         });
-        await api.reEncrypt(identityStore.id, identityStore.key, request.callback, data);
+        try {
+            notificationStore.enqueueInfo('正在提交重加密密钥');
+            componentStateStore.setProgress(true);
+            await api.reEncrypt(identityStore.id, identityStore.key, request.callback, data);
+            notificationStore.enqueueSuccess('成功提交重加密密钥');
+        } catch ({ message }) {
+            notificationStore.enqueueError(message);
+        } finally {
+            componentStateStore.setProgress(false);
+        }
     };
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
@@ -66,57 +77,36 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
     </>;
 });
 
-const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({request}) => {
-    const { userDataStore, identityStore, notificationStore, keyStore } = useStores();
+const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request }) => {
+    const { userDataStore, identityStore, notificationStore, keyStore, componentStateStore } = useStores();
     const alice = useAlice();
-    const deltaDataStore = useLocalStore(
-        () => ({
-            data: Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])),
-            get dataArray() {
-                return Object.entries(deltaDataStore.data).map(([key, { value, tag }]) => ({ key, value, tag }));
-            },
-            set(key: string, value: string, tag: string) {
-                deltaDataStore.data[key] = { value, tag };
-            },
-            del(name: string) {
-                delete deltaDataStore.data[name];
-            }
-        }),
-    );
+    const deltaDataStore = new UserDataStore(Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])));
     const handleAuth = async () => {
         deltaDataStore.dataArray.forEach(({ key, value, tag }) => userDataStore.set(key, value, tag));
-        const dataKey = await userDataStore.submit(identityStore.id, identityStore.key, alice);
-        if (userDataStore.error) {
-            notificationStore.enqueueError(userDataStore.message);
-        } else {
+        const encrypted: Record<string, Encrypted> = {};
+        const dataKey: Record<string, PreKeyPair> = {};
+        await Promise.all(userDataStore.dataArrayGroupedByTag.map(async ([tag, kv]) => {
+            const { pk, sk } = alice.key();
+            dataKey[tag] = { pk, sk };
+            encrypted[tag] = await alice.encrypt(JSON.stringify(kv), pk);
+        }));
+        try {
+            notificationStore.enqueueInfo('正在提交加密数据');
+            componentStateStore.setProgress(true);
+            await api.setData(identityStore.id, identityStore.key, encrypted);
             await keyStore.set(dataKey);
             notificationStore.enqueueSuccess('成功加密并提交');
+        } catch ({ message }) {
+            notificationStore.enqueueError(message);
+        } finally {
+            componentStateStore.setProgress(false);
         }
     };
 
     return <>
         <CardContent>
             <Typography>应用{request.id}想要更新您的以下数据：</Typography>
-            <Table
-                columns={[
-                    { title: '键', field: 'key', grouping: false },
-                    { title: '值', field: 'value', grouping: false },
-                    { title: '标签', field: 'tag' },
-                ]}
-                title='个人信息'
-                data={deltaDataStore.dataArray}
-                editable={{
-                    // eslint-disable-next-line @typescript-eslint/require-await
-                    onRowDelete: async ({ key }) => deltaDataStore.del(key),
-                    // eslint-disable-next-line @typescript-eslint/require-await
-                    onRowAdd: async ({ key, value, tag }) => deltaDataStore.set(key, value, tag),
-                    // eslint-disable-next-line @typescript-eslint/require-await
-                    onRowUpdate: async ({ key, value, tag }, oldData) => {
-                        oldData && oldData.key !== key && deltaDataStore.del(oldData.key);
-                        deltaDataStore.set(key, value, tag);
-                    }
-                }}
-            />
+            <Table title='更新信息' dataStore={deltaDataStore} />
         </CardContent>
         <CardActions>
             <Button onClick={handleAuth} variant='contained' color='primary'>授权</Button>
@@ -129,10 +119,10 @@ export const Auth = observer<FC<RouteComponentProps>>(() => {
     const request = useUrlParams<AuthRequest>('request');
     useUserData();
 
-    return (!identityStore.id || !request) ? <Redirect to='/' noThrow /> : (
+    return !identityStore.id || !request ? <Redirect to='/' noThrow /> : (
         <Card>
             <CardHeader title='授权应用' />
-            {request.type === 'get' ? <AuthGetting request={request} /> : <AuthSetting request={request}/>}
+            {request.type === 'get' ? <AuthGetting request={request} /> : <AuthSetting request={request} />}
         </Card>
     );
 });
