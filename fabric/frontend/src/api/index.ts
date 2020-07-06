@@ -4,7 +4,7 @@ import { sign } from '../utils/ecdsa';
 import { Encrypted } from '../utils/alice';
 
 export class ENDPOINT {
-    static base = 'https://predauth.com:4000';
+    static base = 'https://api.predauth.com:4000';
     static register = (id: string) => `${ENDPOINT.base}/user/${id}`;
     static data = (id: string) => `${ENDPOINT.base}/user/${id}/data`;
     static backup = (id: string) => `${ENDPOINT.base}/user/${id}/backup`;
