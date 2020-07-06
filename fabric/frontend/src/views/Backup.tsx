@@ -1,79 +1,226 @@
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, TextField, Typography } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, CardHeader, Chip, Divider, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
 import { Redirect, RouteComponentProps } from '@reach/router';
 
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { useAlice } from '../hooks/useAlice';
 import { api } from '../api';
+import { BeforeCapture, DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
+import { useStyles } from '../styles/backup';
+import { classNames } from '../utils/classnames';
+import { DeleteForever } from '@material-ui/icons';
+
+const TagsGroup: FC<{ tags: string[] }> = ({ tags }) => {
+    const classes = useStyles();
+    return (
+        <Droppable droppableId='tags' isDropDisabled direction='horizontal'>
+            {({ innerRef, placeholder }) => (
+                <div ref={innerRef} className={classes.chipsContainer}>
+                    {tags.map((tag, index) => (
+                        <Draggable key={tag} draggableId={tag} index={index}>
+                            {({ innerRef, draggableProps, dragHandleProps }, snapshot) => (
+                                <>
+                                    <Chip
+                                        label={tag}
+                                        color='secondary'
+                                        variant='outlined'
+                                        innerRef={innerRef}
+                                        className={classes.chip}
+                                        {...draggableProps}
+                                        {...dragHandleProps}
+                                    />
+                                    {snapshot.isDragging && (
+                                        <Chip
+                                            label={tag}
+                                            color='secondary'
+                                            variant='outlined'
+                                            className={classNames(classes.draggingChip, classes.chip)}
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </Draggable>
+                    ))}
+                    <div className={classes.hidden}>{placeholder}</div>
+                </div>
+            )}
+        </Droppable>
+    );
+};
+
+const TagsCard: FC<{ pk: string; index: number; }> = ({ children, pk, index }) => {
+    const classes = useStyles();
+    return (
+        <Card className={classes.card} key={pk}>
+            <CardHeader
+                classes={{ content: classes.cardHeader }}
+                title={`节点${index + 1}`}
+                subheader={
+                    <Tooltip title={pk}>
+                        <Typography
+                            variant='body2'
+                            color='textSecondary'
+                            className={classes.cardSubheader}
+                        >
+                            {`公钥：${pk}`}
+                        </Typography>
+                    </Tooltip>
+                }
+            />
+            <Divider variant='middle' />
+            <Droppable key={pk} droppableId={pk} direction='horizontal'>
+                {({ innerRef, placeholder }) => (
+                    <CardContent innerRef={innerRef} className={classes.cardContent}>
+                        {children}
+                        <div className={classes.placeholderChip}>{placeholder}</div>
+                    </CardContent>
+                )}
+            </Droppable>
+        </Card>
+    );
+};
 
 export const Backup = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore, userDataStore, keyStore, notificationStore } = useStores();
+    const { identityStore, userDataStore, keyStore, notificationStore, componentStateStore } = useStores();
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }
+    const classes = useStyles();
     useUserData();
-    const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
+    const [tagsMap, setTagsMap] = useState<Record<string, string[]>>({});
     const [pks, setPKs] = useState<string[]>([]);
     const [email, setEmail] = useState('');
+    const [trashOn, setTrashOn] = useState(false);
     const alice = useAlice();
     useEffect(() => {
         void (async () => {
             try {
+                notificationStore.enqueueInfo('正在获取节点公钥');
+                componentStateStore.setProgress(true);
                 const { pks } = await api.getPKs();
+                setTagsMap(Object.fromEntries(pks.map((pk) => [pk, []])));
                 setPKs(pks);
+                notificationStore.enqueueSuccess('成功获取节点公钥');
             } catch ({ message }) {
                 notificationStore.enqueueError(message);
+            } finally {
+                componentStateStore.setProgress(false);
             }
         })();
     }, []);
-    const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
-        const { name, checked } = event.target;
-        setChecked((prevChecked) => ({ ...prevChecked, [name]: checked }));
-    };
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
         setEmail(value);
     };
     const handleBackup = async () => {
-        const data: Record<string, { rk: Record<string, string>; email: string; }> = {};
-        pks.map((pk) => {
-            const rk: Record<string, string> = {};
-            Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
-                rk[tag] = alice.reKey(pk, keyStore.dataKey[tag].sk);
-            });
-            data[pk] = {
-                rk,
+        const data = Object.fromEntries(Object.entries(tagsMap).filter(([, tags]) => tags.length).map(([pk, tags]) => [
+            pk,
+            {
+                rk: Object.fromEntries(tags.map((tag) => [tag, alice.reKey(pk, keyStore.dataKey[tag].sk)])),
                 email
+            }
+        ]));
+        try {
+            notificationStore.enqueueInfo('正在备份重加密密钥');
+            componentStateStore.setProgress(true);
+            await api.backup(identityStore.id, identityStore.key, data);
+            notificationStore.enqueueSuccess('成功提交重加密密钥');
+        } catch ({ message }) {
+            notificationStore.enqueueError(message);
+        } finally {
+            componentStateStore.setProgress(false);
+        }
+    };
+    const handleDragEnd = ({ source, destination, draggableId }: DropResult) => {
+        setTrashOn(false);
+        if (!destination || source.droppableId === destination.droppableId) {
+            return;
+        }
+        draggableId = draggableId.slice(draggableId.indexOf('-') + 1);
+        if (destination.droppableId === 'trash') {
+            setTagsMap((prevTagsMap) => {
+                return {
+                    ...prevTagsMap,
+                    [source.droppableId]: prevTagsMap[source.droppableId].filter((tag) => tag !== draggableId),
+                };
+            });
+            return;
+        }
+        if (source.droppableId === 'tags') {
+            setTagsMap((prevTagsMap) => {
+                return {
+                    ...prevTagsMap,
+                    [destination.droppableId]: [...new Set(prevTagsMap[destination.droppableId].concat(draggableId))],
+                };
+            });
+            return;
+        }
+        setTagsMap((prevTagsMap) => {
+            return {
+                ...prevTagsMap,
+                [source.droppableId]: prevTagsMap[source.droppableId].filter((tag) => tag !== draggableId),
+                [destination.droppableId]: [...new Set(prevTagsMap[destination.droppableId].concat(draggableId))],
             };
         });
-
-        await api.backup(identityStore.id, identityStore.key, data);
+    };
+    const handleCapture = ({ draggableId }: BeforeCapture) => {
+        if (draggableId[0] === '!') {
+            setTrashOn(true);
+        }
     };
     return (
-        <Card>
-            <CardHeader title='备份数据' />
-            <CardContent>
-                <Typography>您可以输入恢复手段（邮箱或手机号），并指定允许PreDAuth获取的数据，为PreDAuth生成重加密密钥，以便于私钥丢失后仍能找回相应数据。</Typography>
-                <Typography>对于敏感数据，您可以选择不信任PreDAuth，而是选择自己记忆，并承担私钥丢失的后果。</Typography>
-                <TextField
-                    autoFocus
-                    margin='dense'
-                    label='恢复手段'
-                    fullWidth
-                    value={email}
-                    onChange={handleInput}
-                />
-                {Object.keys(userDataStore.dataGroupedByTag).map((tag) => <FormControlLabel
-                    control={<Checkbox checked={!!checked[tag]} onChange={handleCheck} name={tag} />}
-                    label={tag}
-                    key={tag}
-                />)}
-            </CardContent>
-            <CardActions>
-                <Button variant='contained' color='primary' onClick={handleBackup}>备份</Button>
-            </CardActions>
-        </Card>
+        <DragDropContext onBeforeCapture={handleCapture} onDragEnd={handleDragEnd}>
+            <Card>
+                <CardHeader title='备份数据' />
+                <CardContent>
+                    <Typography>您可以输入恢复手段（邮箱或手机号），并指定允许PreDAuth获取的数据，为PreDAuth生成重加密密钥，以便于私钥丢失后仍能找回相应数据。</Typography>
+                    <Typography>对于敏感数据，您可以选择不信任PreDAuth，而是选择自己记忆，并承担私钥丢失的后果。</Typography>
+                    <TextField
+                        autoFocus
+                        margin='dense'
+                        label='恢复手段'
+                        fullWidth
+                        value={email}
+                        onChange={handleInput}
+                    />
+                    <TagsGroup tags={userDataStore.tags} />
+                    <div className={classes.cardsContainer}>
+                        {!!pks.length && pks.map((pk, index) => (
+                            <TagsCard pk={pk} index={index} key={pk}>
+                                {tagsMap[pk].length ? tagsMap[pk].map((tag, index) => (
+                                    <Draggable key={tag} draggableId={`!${pk}-${tag}`} index={index}>
+                                        {({ innerRef, dragHandleProps, draggableProps }) => (
+                                            <Chip
+                                                key={tag}
+                                                label={tag}
+                                                color='secondary'
+                                                variant='outlined'
+                                                className={classes.chip}
+                                                innerRef={innerRef}
+                                                {...draggableProps}
+                                                {...dragHandleProps}
+                                            />
+                                        )}
+                                    </Draggable>
+                                )) : <Chip label='拖拽标签至此' variant='outlined' className={classNames(classes.chip, classes.defaultChip)} />}
+                            </TagsCard>
+                        ))}
+                    </div>
+                </CardContent>
+                <CardActions>
+                    <Button className={classes.button} variant='contained' size='large' color='primary' onClick={handleBackup}>备份</Button>
+                    {trashOn && <Droppable droppableId='trash'>
+                        {({ innerRef, placeholder }) => (
+                            <IconButton ref={innerRef}>
+                                <DeleteForever fontSize='large' color='primary' />
+                                <div className={classes.hidden}>{placeholder}</div>
+                            </IconButton>
+                        )}
+                    </Droppable>}
+                </CardActions>
+            </Card>
+        </DragDropContext>
     );
 });
