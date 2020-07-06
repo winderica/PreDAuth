@@ -16,9 +16,9 @@ import { Recover } from './Recover';
 export const App: FC = () => {
     useStyles();
     return (
-        <SnackbarProvider>
-            <LocationProvider>
-                <ThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>
+            <SnackbarProvider maxSnack={5}>
+                <LocationProvider>
                     <Frame>
                         <AliceProvider>
                             <Router>
@@ -31,8 +31,8 @@ export const App: FC = () => {
                             </Router>
                         </AliceProvider>
                     </Frame>
-                </ThemeProvider>
-            </LocationProvider>
-        </SnackbarProvider>
+                </LocationProvider>
+            </SnackbarProvider>
+        </ThemeProvider>
     );
 };
