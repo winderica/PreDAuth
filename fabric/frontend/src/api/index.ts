@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { random } from '../utils/random';
-import { sign } from '../utils/ecdsa';
+import { exportPublicKey, sign } from '../utils/ecdsa';
 import { Encrypted } from '../utils/alice';
 
 export class ENDPOINT {
@@ -109,7 +109,7 @@ class API {
     }
 
     async recoverByCode(id: string, payload: { codes: string[] }) {
-        const { data } = await this.#axios.post<R<{ data: string[] }>>(ENDPOINT.recoverByCode(id), {
+        const { data } = await this.#axios.post<R<{ data: Record<string, string>[] }>>(ENDPOINT.recoverByCode(id), {
             payload
         });
         if (!data.ok) {
@@ -118,13 +118,15 @@ class API {
         return data.payload;
     }
 
-    async register(id: string, key: CryptoKeyPair, payload: { publicKey: string }) {
+    async register(id: string, key: CryptoKeyPair) {
         const nonce = random(32);
         const signature = await sign(nonce, key);
         const { data } = await this.#axios.post<R<undefined>>(ENDPOINT.register(id), {
             nonce,
             signature,
-            payload
+            payload: {
+                publicKey: await exportPublicKey(key)
+            }
         });
         if (!data.ok) {
             throw new Error(data.payload.message);
