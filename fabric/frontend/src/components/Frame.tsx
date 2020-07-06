@@ -8,6 +8,7 @@ import { Notifier } from './Notifier';
 
 import { useStores } from '../hooks/useStores';
 import { useStyles } from '../styles/frame';
+import { Progress } from './Progress';
 
 const listItems = [
     { to: '/data', text: 'data', icon: <List /> },
@@ -17,7 +18,7 @@ const listItems = [
 
 export const Frame = observer<FC>(({ children }) => {
     const classes = useStyles();
-    const { identityStore, keyStore } = useStores();
+    const { identityStore, keyStore, componentStateStore } = useStores();
     const [open, setOpen] = useState(false);
     const [initialized, setInitialized] = useState(false);
 
@@ -43,6 +44,7 @@ export const Frame = observer<FC>(({ children }) => {
             <main className={classes.content} onClick={handleClick}>
                 {children}
             </main>
+            {componentStateStore.progressOn && <Progress />}
             <Notifier />
         </div>
     ) : null;

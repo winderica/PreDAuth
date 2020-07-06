@@ -5,11 +5,11 @@ import { Redirect, RouteComponentProps } from '@reach/router';
 
 import { Dialog } from '../components/Dialog';
 import { useStores } from '../hooks/useStores';
-import { exportPublicKey, generateKey } from '../utils/ecdsa';
+import { generateKey } from '../utils/ecdsa';
 import { api } from '../api';
 
 export const Register = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore, notificationStore } = useStores();
+    const { identityStore, notificationStore, componentStateStore } = useStores();
     const [id, setId] = useState('');
     const handleInput = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
         setId(value);
@@ -17,13 +17,16 @@ export const Register = observer<FC<RouteComponentProps>>(() => {
     const handleSubmit = async () => {
         try {
             const key = await generateKey();
-            const publicKey = await exportPublicKey(key);
-            await api.register(id, key, { publicKey });
+            notificationStore.enqueueInfo('正在提交');
+            componentStateStore.setProgress(true);
+            await api.register(id, key);
             await identityStore.setId(id);
             await identityStore.setKey(key);
             notificationStore.enqueueSuccess('提交成功');
         } catch ({ message }) {
             notificationStore.enqueueError(message);
+        } finally {
+            componentStateStore.setProgress(false);
         }
     };
     return identityStore.id
@@ -45,8 +48,8 @@ export const Register = observer<FC<RouteComponentProps>>(() => {
                     />
                 </>
             }
-            actions={<>
+            actions={
                 <Button color='primary' onClick={handleSubmit}>提交</Button>
-            </>}
+            }
         />;
 });

@@ -10,7 +10,7 @@ import { api } from '../api';
 
 export const AliceProvider = observer<FC>(({ children }) => {
     const [alice, setAlice] = useState<Alice | undefined>(undefined);
-    const { notificationStore } = useStores();
+    const { notificationStore, componentStateStore } = useStores();
     useEffect(() => {
         void (async () => {
             const pre = new PRE();
@@ -18,11 +18,16 @@ export const AliceProvider = observer<FC>(({ children }) => {
             const gh = await idb.get<{ g: string; h: string; }>('gh');
             if (!gh) {
                 try {
+                    notificationStore.enqueueInfo('正在获取生成元');
+                    componentStateStore.setProgress(true);
                     const { g, h } = await api.getGenerators();
+                    notificationStore.enqueueSuccess('成功获取生成元');
                     await idb.set('gh', { g, h });
                     setAlice(new Alice(pre, g, h));
                 } catch ({ message }) {
                     notificationStore.enqueueError(message);
+                } finally {
+                    componentStateStore.setProgress(false);
                 }
             } else {
                 const { g, h } = gh;
