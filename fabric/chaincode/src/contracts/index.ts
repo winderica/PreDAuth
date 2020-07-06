@@ -125,33 +125,30 @@ export class PreDAuth extends Contract {
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
-        const { payload }: Request<{ email: string; }> = JSON.parse(request);
-        const { email } = this.backupDB.get(id);
-        if (email !== payload.email) {
+        const { payload: { email } }: Request<{ email: string; }> = JSON.parse(request);
+        const stored = this.backupDB.get(id);
+        if (!stored) {
+            return;
+        }
+        if (stored.email !== email) {
             throw new Error('Verification failed');
         }
         const code = randomCode();
         this.codeDB.set(id, { code, time: Date.now() });
         await ctx.recovery.set([id], 'true');
-        await mailto({ from: 'PreDAuth', to: payload.email, subject: 'Verification Code', text: code });
+        await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
-        const { nonce, signature, payload }: Request<{ codes: string[]; } & PK> = JSON.parse(request);
-        const publicKey = payload.publicKey;
-        if (!verify(nonce, publicKey, signature)) {
-            throw new Error('Verification failed');
-        }
+        const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
         const { code, time } = this.codeDB.get(id);
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
         this.codeDB.del(id);
-        await ctx.recovery.del([id]);
         const { rk } = this.backupDB.get(id);
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
-        await ctx.identity.set([id], payload.publicKey);
         return JSON.stringify({ // TODO: encrypt decrypted data using user's new publicKey
             data: Object.fromEntries(Object.entries(reEncrypted).map(([tag, { data, key, iv }]) =>
                 [tag, this.handleReDecrypt(data, key, iv)]
