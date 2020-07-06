@@ -1,10 +1,10 @@
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface Props {
     open: boolean;
 }
 
-export const useStyles = makeStyles(({ zIndex, palette, transitions, spacing, breakpoints }) => createStyles({
+export const useStyles = makeStyles(({ zIndex, palette, transitions, spacing, breakpoints }) => ({
     appBar: ({ open }: Props) => ({
         zIndex: zIndex.drawer + 1,
         background: `linear-gradient(60deg, ${palette.primary.main}, ${palette.primary.dark})`,

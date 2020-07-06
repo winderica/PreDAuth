@@ -1,7 +1,6 @@
 import { makeStyles } from '@material-ui/core';
-import { createStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles(({ spacing, breakpoints }) => createStyles({
+export const useStyles = makeStyles(({ spacing, breakpoints }) => ({
     root: {
         display: 'flex',
         height: '100vh',

@@ -1,10 +1,10 @@
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 interface Props {
     open: boolean;
 }
 
-export const useStyles = makeStyles(({ transitions, mixins, spacing/*, breakpoints*/ }) => createStyles({
+export const useStyles = makeStyles(({ transitions, mixins, spacing/*, breakpoints*/ }) => ({
     drawerPaper: ({ open }: Props) => ({
         position: 'sticky',
         overflowX: 'hidden',

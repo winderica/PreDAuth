@@ -1,6 +1,6 @@
-import { createStyles, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles(({ spacing }) => createStyles({
+export const useStyles = makeStyles(({ spacing }) => ({
     container: {
         width: spacing(80)
     },
