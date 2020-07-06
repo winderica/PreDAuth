@@ -139,6 +139,7 @@ export class PreDAuth extends Contract {
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
+        this.codeDB.del(id);
         await ctx.recovery.del([id]);
         const { rk } = this.backupDB.get(id);
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
