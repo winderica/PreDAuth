@@ -119,7 +119,9 @@ export class PreDAuth extends Contract {
         if (!verify(nonce, await this.getIdentity(ctx, id), signature)) {
             throw new Error('Verification failed');
         }
-        await ctx.backup.set(this.msp, id, JSON.stringify(payload[this.pre.serialize(this.pk)]));
+        if (payload[this.pre.serialize(this.pk)]) {
+            await ctx.backup.set(this.msp, id, JSON.stringify(payload[this.pre.serialize(this.pk)]));
+        }
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
