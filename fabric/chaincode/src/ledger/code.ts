@@ -3,6 +3,8 @@ import { PrivateLedger } from './private';
 
 export class CodeLedger extends PrivateLedger {
     constructor(ctx: Context) {
-        super(ctx, 'codeLedger');
+        /* eslint-disable */
+        super(ctx, `codeLedger_${(ctx.stub as any).getMspID()}`);
+        /* eslint-enable */
     }
 }
