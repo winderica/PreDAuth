@@ -7,24 +7,20 @@ export abstract class PrivateLedger {
     ) {
     }
 
-    init(msp: string) {
-        this.name = this.name + '_' + msp;
-    }
-
-    async set(id: string, state: string) {
+    async set(msp: string, id: string, state: string) {
         await this.ctx.stub.putPrivateData(
-            this.name,
+            this.name + '_' + msp,
             id,
             Buffer.from(state)
         );
     }
 
-    async get(id: string) {
-        const data = await this.ctx.stub.getPrivateData(this.name, id);
+    async get(msp: string, id: string) {
+        const data = await this.ctx.stub.getPrivateData(this.name + '_' + msp, id);
         return Buffer.from(data).toString('utf8');
     }
 
-    async del(id: string) {
-        await this.ctx.stub.deletePrivateData(this.name, id);
+    async del(msp: string, id: string) {
+        await this.ctx.stub.deletePrivateData(this.name + '_' + msp, id);
     }
 }

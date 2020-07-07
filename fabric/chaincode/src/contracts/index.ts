@@ -30,6 +30,7 @@ export class PreDAuth extends Contract {
     h!: G2;
     private sk!: Fr;
     private pk!: G2;
+    msp!: string;
 
     createContext() {
         return new PreDAuthContext();
@@ -75,8 +76,7 @@ export class PreDAuth extends Contract {
         this.sk = sk;
         this.pk = pk;
         /* eslint-disable */
-        ctx.backup.init((ctx.stub as any).getMspID());
-        ctx.code.init((ctx.stub as any).getMspID());
+        this.msp = (ctx.stub as any).getMspID();
         /* eslint-enable */
     }
 
@@ -119,12 +119,12 @@ export class PreDAuth extends Contract {
         if (!verify(nonce, await this.getIdentity(ctx, id), signature)) {
             throw new Error('Verification failed');
         }
-        await ctx.backup.set(id, JSON.stringify(payload[this.pre.serialize(this.pk)]));
+        await ctx.backup.set(this.msp, id, JSON.stringify(payload[this.pre.serialize(this.pk)]));
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<{ email: string; }> = JSON.parse(request);
-        const backup = await ctx.backup.get(id);
+        const backup = await ctx.backup.get(this.msp, id);
         if (!backup.length) {
             // if current node does not have rk and email of `id`, just alter the state of ledger
             await ctx.recovery.set([id], 'true');
@@ -135,23 +135,23 @@ export class PreDAuth extends Contract {
             throw new Error('Verification failed');
         }
         const code = randomCode();
-        await ctx.code.set(id, JSON.stringify({ code, time: Date.now() }));
+        await ctx.code.set(this.msp, id, JSON.stringify({ code, time: Date.now() }));
         await ctx.recovery.set([id], 'true');
         await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
-        const backup = await ctx.backup.get(id);
+        const backup = await ctx.backup.get(this.msp, id);
         if (!backup.length) {
             // if current node does not have rk and email of `id`, just return empty data
             JSON.stringify({ data: {} });
         }
-        const { code, time } = JSON.parse(await ctx.code.get(id));
+        const { code, time } = JSON.parse(await ctx.code.get(this.msp, id));
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
-        await ctx.code.del(id);
+        await ctx.code.del(this.msp, id);
         const { rk } = JSON.parse(backup);
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
