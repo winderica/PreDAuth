@@ -1,24 +1,26 @@
 import { Context, Contract } from 'fabric-contract-api';
-import { DataLedger, IdentityLedger, RecoveryLedger } from '../ledger';
+import { BackupLedger, CodeLedger, DataLedger, IdentityLedger, RecoveryLedger } from '../ledger';
 import { verify } from '../utils/ecdsa';
 import { AES } from '../utils/aes';
 import { randomCode } from '../utils/code';
 import { Fr, G1, G2, PRE } from '../utils/pre';
 import { mailto } from '../utils/mail';
 import { Backup, Data, PK, Request, RK } from '../constants/types';
-import { BackupDB, CodeDB } from '../db';
 
 class PreDAuthContext extends Context {
     data: DataLedger;
     identity: IdentityLedger;
     recovery: RecoveryLedger;
+    backup: BackupLedger;
+    code: CodeLedger;
 
     constructor() {
         super();
         this.data = new DataLedger(this);
         this.identity = new IdentityLedger(this);
         this.recovery = new RecoveryLedger(this);
-
+        this.backup = new BackupLedger(this);
+        this.code = new CodeLedger(this);
     }
 }
 
@@ -28,14 +30,6 @@ export class PreDAuth extends Contract {
     h!: G2;
     private sk!: Fr;
     private pk!: G2;
-    backupDB: BackupDB;
-    codeDB: CodeDB;
-
-    constructor() {
-        super();
-        this.backupDB = new BackupDB();
-        this.codeDB = new CodeDB();
-    }
 
     createContext() {
         return new PreDAuthContext();
@@ -121,32 +115,40 @@ export class PreDAuth extends Contract {
         if (!verify(nonce, await this.getIdentity(ctx, id), signature)) {
             throw new Error('Verification failed');
         }
-        this.backupDB.set(id, payload[this.pre.serialize(this.pk)]);
+        await ctx.backup.set(id, JSON.stringify(payload[this.pre.serialize(this.pk)]));
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
-        const { payload: { email } }: Request<{ email: string; }> = JSON.parse(request);
-        const stored = this.backupDB.get(id);
-        if (!stored) {
+        const { payload }: Request<{ email: string; }> = JSON.parse(request);
+        const backup = await ctx.backup.get(id);
+        if (!backup.length) {
+            // if current node does not have rk and email of `id`, just alter the state of ledger
+            await ctx.recovery.set([id], 'true');
             return;
         }
-        if (stored.email !== email) {
+        const { email } = JSON.parse(backup);
+        if (payload.email !== email) {
             throw new Error('Verification failed');
         }
         const code = randomCode();
-        this.codeDB.set(id, { code, time: Date.now() });
+        await ctx.code.set(id, JSON.stringify({ code, time: Date.now() }));
         await ctx.recovery.set([id], 'true');
         await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
-        const { code, time } = this.codeDB.get(id);
+        const backup = await ctx.backup.get(id);
+        if (!backup.length) {
+            // if current node does not have rk and email of `id`, just return empty data
+            JSON.stringify({ data: {} });
+        }
+        const { code, time } = JSON.parse(await ctx.code.get(id));
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
-        this.codeDB.del(id);
-        const { rk } = this.backupDB.get(id);
+        await ctx.code.del(id);
+        const { rk } = JSON.parse(backup);
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
         return JSON.stringify({ // TODO: encrypt decrypted data using user's new publicKey
