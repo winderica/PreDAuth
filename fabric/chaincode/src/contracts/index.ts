@@ -65,7 +65,7 @@ export class PreDAuth extends Contract {
         return aes.decrypt(cipher);
     }
 
-    async init(_: PreDAuthContext, str1: string, str2: string) {
+    async init(ctx: PreDAuthContext, str1: string, str2: string) {
         this.pre = new PRE();
         await this.pre.init();
         const { g, h } = this.pre.generatorGen(str1, str2);
@@ -74,6 +74,10 @@ export class PreDAuth extends Contract {
         const { sk, pk } = this.pre.keyGenInG2(h);
         this.sk = sk;
         this.pk = pk;
+        /* eslint-disable */
+        ctx.backup.init((ctx.stub as any).getMspID());
+        ctx.code.init((ctx.stub as any).getMspID());
+        /* eslint-enable */
     }
 
     async getIdentity(ctx: PreDAuthContext, id: string) {

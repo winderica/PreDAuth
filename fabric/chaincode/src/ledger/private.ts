@@ -3,8 +3,12 @@ import { Context } from 'fabric-contract-api';
 export abstract class PrivateLedger {
     protected constructor(
         private readonly ctx: Context,
-        private readonly name: string,
+        private name: string,
     ) {
+    }
+
+    init(msp: string) {
+        this.name = this.name + '_' + msp;
     }
 
     async set(id: string, state: string) {
