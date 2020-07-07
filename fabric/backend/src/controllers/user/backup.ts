@@ -6,7 +6,7 @@ export const backup: PostHandler<{ id: string }> = async (req, res, next) => {
         const { id } = req.params;
         await Promise.all([1, 2].map(async (org) => {
             const contract = await getContract(`admin${org}`);
-            await contract.evaluateTransaction('backup', id, JSON.stringify(req.body));
+            await contract.submitTransaction('backup', id, JSON.stringify(req.body));
         }));
         res.json({ ok: true });
     } catch (e) {

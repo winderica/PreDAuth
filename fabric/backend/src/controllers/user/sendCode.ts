@@ -6,7 +6,7 @@ export const sendCode: GetHandler<{ id: string; email: string }> = async (req, r
         const { id, email } = req.params;
         await Promise.all([1, 2].map(async (org) => {
             const contract = await getContract(`admin${org}`);
-            await contract.evaluateTransaction('verifyEmail', id, JSON.stringify({ payload: { email } }));
+            await contract.submitTransaction('verifyEmail', id, JSON.stringify({ payload: { email } }));
         }));
         res.json({ ok: true });
     } catch (e) {
