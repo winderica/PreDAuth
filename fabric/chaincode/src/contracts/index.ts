@@ -1,5 +1,5 @@
 import { Context, Contract } from 'fabric-contract-api';
-import { BackupLedger, CodeLedger, DataLedger, IdentityLedger, RecoveryLedger } from '../ledger';
+import { BackupLedger, CodeLedger, DataLedger, IdentityLedger } from '../ledger';
 import { verify } from '../utils/ecdsa';
 import { AES } from '../utils/aes';
 import { randomCode } from '../utils/code';
@@ -10,7 +10,6 @@ import { Backup, Data, PK, Request, RK } from '../constants/types';
 class PreDAuthContext extends Context {
     data: DataLedger;
     identity: IdentityLedger;
-    recovery: RecoveryLedger;
     backup: BackupLedger;
     code: CodeLedger;
 
@@ -18,7 +17,6 @@ class PreDAuthContext extends Context {
         super();
         this.data = new DataLedger(this);
         this.identity = new IdentityLedger(this);
-        this.recovery = new RecoveryLedger(this);
         this.backup = new BackupLedger(this);
         this.code = new CodeLedger(this);
     }
@@ -128,8 +126,6 @@ export class PreDAuth extends Contract {
         const { payload }: Request<{ email: string; }> = JSON.parse(request);
         const backup = await ctx.backup.get(this.msp, id);
         if (!backup.length) {
-            // if current node does not have rk and email of `id`, just alter the state of ledger
-            await ctx.recovery.set([id], 'true');
             return;
         }
         const { email } = JSON.parse(backup);
@@ -138,7 +134,6 @@ export class PreDAuth extends Contract {
         }
         const code = randomCode();
         await ctx.code.set(this.msp, id, JSON.stringify({ code, time: Date.now() }));
-        await ctx.recovery.set([id], 'true');
         await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
 
