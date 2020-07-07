@@ -5,7 +5,7 @@ export const sendCode: GetHandler<{ id: string; email: string }> = async (req, r
     try {
         const { id, email } = req.params;
         const contract = await getContract('admin1');
-        await contract.submitTransaction('verifyEmail', id, JSON.stringify({ payload: { email } }));
+        await contract.evaluateTransaction('verifyEmail', id, JSON.stringify({ payload: { email } }));
         res.json({ ok: true });
     } catch (e) {
         next(e);
