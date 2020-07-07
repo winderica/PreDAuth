@@ -1,8 +1,8 @@
-import React, { FC } from 'react';
+import React, { FC, forwardRef, ForwardRefRenderFunction } from 'react';
 import { observer } from 'mobx-react';
 import {
     AddBox,
-    ArrowUpward,
+    ArrowDownward,
     Check,
     ChevronLeft,
     ChevronRight,
@@ -15,6 +15,7 @@ import {
     Remove,
     SaveAlt,
     Search,
+    SvgIconComponent,
     ViewColumn
 } from '@material-ui/icons';
 import MaterialTable from 'material-table';
@@ -25,24 +26,9 @@ interface Props {
     dataStore: UserDataStore;
 }
 
-const tableIcons: any = {
-    Add: AddBox,
-    Check,
-    Clear,
-    Delete: DeleteOutline,
-    DetailPanel: ChevronRight,
-    Edit,
-    Export: SaveAlt,
-    Filter: FilterList,
-    FirstPage,
-    LastPage,
-    NextPage: ChevronRight,
-    PreviousPage: ChevronLeft,
-    ResetSearch: Clear,
-    Search,
-    SortArrow: ArrowUpward,
-    ThirdStateCheck: Remove,
-    ViewColumn
+const forwardSVGRef = (Icon: SvgIconComponent) => {
+    const render: ForwardRefRenderFunction<SVGSVGElement> = (props, ref) => <Icon {...props} ref={ref} />;
+    return forwardRef(render);
 };
 
 export const Table: FC<Props> = observer(({ title, dataStore }) => {
@@ -55,7 +41,25 @@ export const Table: FC<Props> = observer(({ title, dataStore }) => {
                 { title: '值', field: 'value', grouping: false },
                 { title: '标签', field: 'tag' },
             ]}
-            icons={tableIcons}
+            icons={{
+                Add: forwardSVGRef(AddBox),
+                Check: forwardSVGRef(Check),
+                Clear: forwardSVGRef(Clear),
+                Delete: forwardSVGRef(DeleteOutline),
+                DetailPanel: forwardSVGRef(ChevronRight),
+                Edit: forwardSVGRef(Edit),
+                Export: forwardSVGRef(SaveAlt),
+                Filter: forwardSVGRef(FilterList),
+                FirstPage: forwardSVGRef(FirstPage),
+                LastPage: forwardSVGRef(LastPage),
+                NextPage: forwardSVGRef(ChevronRight),
+                PreviousPage: forwardSVGRef(ChevronLeft),
+                ResetSearch: forwardSVGRef(Clear),
+                Search: forwardSVGRef(Search),
+                SortArrow: forwardSVGRef(ArrowDownward),
+                ThirdStateCheck: forwardSVGRef(Remove),
+                ViewColumn: forwardSVGRef(ViewColumn)
+            }}
             editable={{
                 /* eslint-disable @typescript-eslint/require-await */
                 onRowDelete: async ({ key }) => dataStore.del(key),

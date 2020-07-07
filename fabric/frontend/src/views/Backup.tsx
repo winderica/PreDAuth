@@ -11,6 +11,7 @@ import { BeforeCapture, DragDropContext, Draggable, Droppable, DropResult } from
 import { useStyles } from '../styles/backup';
 import { classNames } from '../utils/classnames';
 import { DeleteForever } from '@material-ui/icons';
+import { apiWrapper } from '../utils/apiWrapper';
 
 const TagsGroup: FC<{ tags: string[] }> = ({ tags }) => {
     const classes = useStyles();
@@ -83,7 +84,7 @@ const TagsCard: FC<{ pk: string; index: number; }> = ({ children, pk, index }) =
 };
 
 export const Backup = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore, userDataStore, keyStore, notificationStore, componentStateStore } = useStores();
+    const { identityStore, userDataStore, keyStore } = useStores();
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }
@@ -95,20 +96,11 @@ export const Backup = observer<FC<RouteComponentProps>>(() => {
     const [trashOn, setTrashOn] = useState(false);
     const alice = useAlice();
     useEffect(() => {
-        void (async () => {
-            try {
-                notificationStore.enqueueInfo('正在获取节点公钥');
-                componentStateStore.setProgress(true);
-                const { pks } = await api.getPKs();
-                setTagsMap(Object.fromEntries(pks.map((pk) => [pk, []])));
-                setPKs(pks);
-                notificationStore.enqueueSuccess('成功获取节点公钥');
-            } catch ({ message }) {
-                notificationStore.enqueueError(message);
-            } finally {
-                componentStateStore.setProgress(false);
-            }
-        })();
+        void apiWrapper(async () => {
+            const { pks } = await api.getPKs();
+            setTagsMap(Object.fromEntries(pks.map((pk) => [pk, []])));
+            setPKs(pks);
+        }, '正在获取节点公钥', '成功获取节点公钥');
     }, []);
     const handleInput = (event: ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target;
@@ -122,16 +114,11 @@ export const Backup = observer<FC<RouteComponentProps>>(() => {
                 email
             }
         ]));
-        try {
-            notificationStore.enqueueInfo('正在备份重加密密钥');
-            componentStateStore.setProgress(true);
-            await api.backup(identityStore.id, identityStore.key, data);
-            notificationStore.enqueueSuccess('成功提交重加密密钥');
-        } catch ({ message }) {
-            notificationStore.enqueueError(message);
-        } finally {
-            componentStateStore.setProgress(false);
-        }
+        await apiWrapper(
+            async () => api.backup(identityStore.id, identityStore.key, data),
+            '正在备份重加密密钥',
+            '成功提交重加密密钥'
+        );
     };
     const handleDragEnd = ({ source, destination, draggableId }: DropResult) => {
         setTrashOn(false);

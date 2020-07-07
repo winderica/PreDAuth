@@ -9,8 +9,9 @@ import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { api } from '../api';
-import { Encrypted, PreKeyPair } from '../utils/alice';
 import { UserDataStore } from '../stores';
+import { apiWrapper } from '../utils/apiWrapper';
+import { encrypt } from '../utils/aliceWrapper';
 
 interface AuthGettingRequest {
     type: 'get';
@@ -31,7 +32,7 @@ interface AuthSettingRequest {
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
 const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request }) => {
-    const { identityStore, keyStore, userDataStore, notificationStore, componentStateStore } = useStores();
+    const { identityStore, keyStore, userDataStore } = useStores();
     const alice = useAlice();
     const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
     const handleAuth = async () => {
@@ -39,16 +40,11 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
         Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
             data[tag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
         });
-        try {
-            notificationStore.enqueueInfo('正在提交重加密密钥');
-            componentStateStore.setProgress(true);
-            await api.reEncrypt(identityStore.id, identityStore.key, request.callback, data);
-            notificationStore.enqueueSuccess('成功提交重加密密钥');
-        } catch ({ message }) {
-            notificationStore.enqueueError(message);
-        } finally {
-            componentStateStore.setProgress(false);
-        }
+        await apiWrapper(
+            () => api.reEncrypt(identityStore.id, identityStore.key, request.callback, data),
+            '正在提交重加密密钥',
+            '成功提交重加密密钥'
+        );
     };
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
@@ -78,29 +74,16 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
 });
 
 const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request }) => {
-    const { userDataStore, identityStore, notificationStore, keyStore, componentStateStore } = useStores();
+    const { userDataStore, identityStore, keyStore } = useStores();
     const alice = useAlice();
     const deltaDataStore = new UserDataStore(Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])));
     const handleAuth = async () => {
         deltaDataStore.dataArray.forEach(({ key, value, tag }) => userDataStore.set(key, value, tag));
-        const encrypted: Record<string, Encrypted> = {};
-        const dataKey: Record<string, PreKeyPair> = {};
-        await Promise.all(userDataStore.dataArrayGroupedByTag.map(async ([tag, kv]) => {
-            const { pk, sk } = alice.key();
-            dataKey[tag] = { pk, sk };
-            encrypted[tag] = await alice.encrypt(JSON.stringify(kv), pk);
-        }));
-        try {
-            notificationStore.enqueueInfo('正在提交加密数据');
-            componentStateStore.setProgress(true);
+        const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArrayGroupedByTag);
+        await apiWrapper(async () => {
             await api.setData(identityStore.id, identityStore.key, encrypted);
             await keyStore.set(dataKey);
-            notificationStore.enqueueSuccess('成功加密并提交');
-        } catch ({ message }) {
-            notificationStore.enqueueError(message);
-        } finally {
-            componentStateStore.setProgress(false);
-        }
+        }, '正在提交加密数据', '成功加密并提交');
     };
 
     return <>

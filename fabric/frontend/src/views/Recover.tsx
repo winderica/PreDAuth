@@ -5,9 +5,10 @@ import { Button, TextField } from '@material-ui/core';
 
 import { api } from '../api';
 import { useStores } from '../hooks/useStores';
+import { apiWrapper } from '../utils/apiWrapper';
 
 export const Recover = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore, notificationStore, componentStateStore, userDataStore } = useStores();
+    const { identityStore, userDataStore } = useStores();
     const [email, setEmail] = useState('');
     const [id, setId] = useState('');
     const [codes, setCodes] = useState(['', '']);
@@ -23,37 +24,17 @@ export const Recover = observer<FC<RouteComponentProps>>(() => {
         const { value } = event.target;
         setCodes((prevCodes) => prevCodes.map((i, j) => j === index ? value : i));
     };
-    const handleCodeRequest = async () => {
-        try {
-            notificationStore.enqueueInfo('正在请求验证码');
-            componentStateStore.setProgress(true);
-            await api.sendCode(id, email);
-            notificationStore.enqueueSuccess('成功发送验证码');
-        } catch ({ message }) {
-            notificationStore.enqueueError(message);
-        } finally {
-            componentStateStore.setProgress(false);
-        }
-    };
-    const handleRecover = async () => {
-        try {
-            notificationStore.enqueueInfo('正在请求恢复数据');
-            componentStateStore.setProgress(true);
-            const { data } = await api.recoverByCode(id, { codes });
-            data.forEach((obj) => {
-                Object.entries(obj).forEach(([tag, kv]) => {
-                    Object.entries<string>(JSON.parse(kv)).forEach(([key, value]) => {
-                        userDataStore.set(key, value, tag);
-                    });
+    const handleCodeRequest = () => apiWrapper(() => api.sendCode(id, email), '正在请求验证码', '成功发送验证码');
+    const handleRecover = () => apiWrapper(async () => {
+        const { data } = await api.recoverByCode(id, { codes });
+        data.forEach((obj) => {
+            Object.entries(obj).forEach(([tag, kv]) => {
+                Object.entries<string>(JSON.parse(kv)).forEach(([key, value]) => {
+                    userDataStore.set(key, value, tag);
                 });
             });
-            notificationStore.enqueueSuccess('成功获取恢复数据');
-        } catch ({ message }) {
-            notificationStore.enqueueError(message);
-        } finally {
-            componentStateStore.setProgress(false);
-        }
-    };
+        });
+    }, '正在请求恢复数据', '成功获取恢复数据');
     return identityStore.id ? <Redirect to='/' noThrow /> : <>
         <TextField
             autoFocus

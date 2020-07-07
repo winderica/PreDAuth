@@ -3,32 +3,24 @@ import { observer } from 'mobx-react';
 import { Button, TextField, Typography } from '@material-ui/core';
 import { Redirect, RouteComponentProps } from '@reach/router';
 
+import { api } from '../api';
 import { Dialog } from '../components/Dialog';
 import { useStores } from '../hooks/useStores';
 import { generateKey } from '../utils/ecdsa';
-import { api } from '../api';
+import { apiWrapper } from '../utils/apiWrapper';
 
 export const Register = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore, notificationStore, componentStateStore } = useStores();
+    const { identityStore } = useStores();
     const [id, setId] = useState('');
     const handleInput = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
         setId(value);
     };
-    const handleSubmit = async () => {
-        try {
-            const key = await generateKey();
-            notificationStore.enqueueInfo('正在提交');
-            componentStateStore.setProgress(true);
-            await api.register(id, key);
-            await identityStore.setId(id);
-            await identityStore.setKey(key);
-            notificationStore.enqueueSuccess('提交成功');
-        } catch ({ message }) {
-            notificationStore.enqueueError(message);
-        } finally {
-            componentStateStore.setProgress(false);
-        }
-    };
+    const handleSubmit = () => apiWrapper(async () => {
+        const key = await generateKey();
+        await api.register(id, key);
+        await identityStore.setId(id);
+        await identityStore.setKey(key);
+    }, '正在提交', '提交成功');
     return identityStore.id
         ? <Redirect to='/' noThrow />
         : <Dialog
