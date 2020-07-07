@@ -9,7 +9,7 @@ export const verifyCode: PostHandler<{ id: string }> = async (req, res, next) =>
             payload: {
                 data: await Promise.all([1, 2].map(async (org) => {
                     const contract = await getContract(`admin${org}`);
-                    const result = await contract.submitTransaction('recover', id, JSON.stringify(req.body));
+                    const result = await contract.evaluateTransaction('recover', id, JSON.stringify(req.body));
                     return JSON.parse(result.toString('utf8') || '{}').data;
                 }))
             }

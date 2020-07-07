@@ -6,7 +6,6 @@ export CORE_PEER_TLS_ENABLED=true
 export ORDERER_CA=${PWD}/organizations/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 export PEER0_ORG1_CA=${PWD}/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
 export PEER0_ORG2_CA=${PWD}/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
-export COLLECTIONS_CONFIG=${PWD}/collections/config.json
 
 setGlobals() {
   if [ "$1" -eq 1 ]; then
@@ -38,12 +37,12 @@ installChaincode() {
 approveForMyOrg() {
   setGlobals "$1"
   PACKAGE_ID=$(peer lifecycle chaincode queryinstalled | grep "$CHAINCODE_NAME"_"$VERSION" | awk '{print $3}' | sed 's/.$//')
-  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --init-required --package-id "${PACKAGE_ID}" --sequence "${VERSION}" --collections-config "${COLLECTIONS_CONFIG}"
+  peer lifecycle chaincode approveformyorg -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --init-required --package-id "${PACKAGE_ID}" --sequence "${VERSION}"
 }
 
 checkCommitReadiness() {
   setGlobals "$1"
-  peer lifecycle chaincode checkcommitreadiness --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --sequence "${VERSION}" --init-required --collections-config "${COLLECTIONS_CONFIG}"
+  peer lifecycle chaincode checkcommitreadiness --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" --version "${VERSION}" --sequence "${VERSION}" --init-required
 }
 
 commitChaincodeDefinition() {
@@ -55,7 +54,7 @@ commitChaincodeDefinition() {
     PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
     shift
   done
-  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" $PEER_CONN_PARMS --version "${VERSION}" --sequence "${VERSION}" --init-required --collections-config "${COLLECTIONS_CONFIG}"
+  peer lifecycle chaincode commit -o localhost:7050 --ordererTLSHostnameOverride orderer.example.com --tls $CORE_PEER_TLS_ENABLED --cafile "$ORDERER_CA" --channelID "$CHANNEL_NAME" --name "$CHAINCODE_NAME" $PEER_CONN_PARMS --version "${VERSION}" --sequence "${VERSION}" --init-required
 }
 
 getVersion() {
