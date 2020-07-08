@@ -10,19 +10,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const pre = new PRE();
-const id = 'bob';
 
 (async () => {
     try {
         await pre.init();
-        await fetch('http://127.0.0.1:4000/user/register', {
-            method: 'POST',
-            body: JSON.stringify({ id }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        const { payload: { g, h } } = await (await fetch(`http://127.0.0.1:4000/auth/generators`)).json();
+        const { payload: { g, h } } = await (await fetch('https://api.predauth.com/auth/generators')).json();
         const bob = new Bob(pre, g, h);
 
         app.get('/pk', (_, res) => {
@@ -30,8 +22,12 @@ const id = 'bob';
         });
 
         app.post('/decrypt', (req, res) => {
-            const data = req.body as { data: string; key: { cb0: string; cb1: string }; iv: string }[];
-            data.map(({ data, key, iv }) => console.log(bob.reDecrypt(data, key, iv)));
+            const data: Record<string, { data: string; key: { cb0: string; cb1: string }; iv: string }> = req.body;
+            console.log(JSON.stringify({
+                data: Object.fromEntries(Object.entries(data).map(([tag, { data, key, iv }]) =>
+                    [tag, bob.reDecrypt(data, key, iv)]
+                ))
+            }));
             res.sendStatus(200);
         });
 
