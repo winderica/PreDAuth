@@ -2,10 +2,18 @@ import express, { json, urlencoded } from 'express';
 import session from 'express-session';
 import fetch from 'node-fetch';
 import cors from 'cors';
+import dotenv from 'dotenv';
 
 import { PRE } from './utils/pre';
 import { Bob } from './utils/bob';
 import { randomString } from './utils/random';
+
+dotenv.config();
+const PREDAUTH_BACKEND = process.env.PREDAUTH_BACKEND;
+
+if (!PREDAUTH_BACKEND) {
+    throw new Error('PREDAUTH_BACKEND not specified');
+}
 
 const app = express();
 app.use(cors());
@@ -22,17 +30,23 @@ const fakeDB: Record<string, Record<string, string>> = {};
 void (async () => {
     try {
         await pre.init();
-        const { payload: { g, h } } = await (await fetch('https://api.predauth.com/auth/generators')).json();
+        const { payload: { g, h } } = await (await fetch(`https://${PREDAUTH_BACKEND}/auth/generators`)).json();
         const bob = new Bob(pre, g, h);
 
         app.get('/pk', (req, res) => {
+            if (!req.session) {
+                throw new Error('This will never happen');
+            }
             const token = randomString();
-            req.session!.token = token;
+            req.session.token = token;
             res.json({ pk: bob.pk, token });
         });
 
         app.get('/data', (req, res) => {
-            const token: string = req.session!.token;
+            if (!req.session) {
+                throw new Error('This will never happen');
+            }
+            const token: string = req.session.token;
             res.json({ data: fakeDB[token] });
         });
 
