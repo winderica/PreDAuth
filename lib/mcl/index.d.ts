@@ -201,7 +201,7 @@ declare module 'mcl' {
 
             dbl<T = G1 | G2>(x: T): T;
 
-            hashToFr(s: string): Fr;
+            hashToFr(s: string | Uint8Array): Fr;
 
             hashAndMapToG1(s: string): G1;
 
