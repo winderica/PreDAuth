@@ -30,16 +30,16 @@ const fakeDB: Record<string, Record<string, string>> = {};
 void (async () => {
     try {
         await pre.init();
-        const { payload: { g, h } } = await (await fetch(`https://${PREDAUTH_BACKEND}/auth/generators`)).json();
+        const { payload: { g, h } } = await (await fetch(`${PREDAUTH_BACKEND}/auth/generators`)).json();
         const bob = new Bob(pre, g, h);
 
-        app.get('/pk', (req, res) => {
+        app.get('/appInfo', (req, res) => {
             if (!req.session) {
                 throw new Error('This will never happen');
             }
             const token = randomString();
             req.session.token = token;
-            res.json({ pk: bob.pk, token });
+            res.json({ pk: bob.pk, data: ['aaa', 'bbb'], callback: `http://127.0.0.1:4001/decrypt/${token}` });
         });
 
         app.get('/data', (req, res) => {
