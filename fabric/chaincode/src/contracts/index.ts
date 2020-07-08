@@ -112,6 +112,8 @@ export class PreDAuth extends Contract {
         const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
         const backup = stored[this.pre.serialize(this.pk)];
         if (!backup) {
+            // if current node does not have rk and email of `id`, just alter the state of ledger
+            await ctx.recovery.set([id], 'true');
             return;
         }
         if (backup.email !== email) {
@@ -126,12 +128,17 @@ export class PreDAuth extends Contract {
     async recover(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
         const { code, time } = this.codeDB.get(id);
+        const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
+        const backup = stored[this.pre.serialize(this.pk)];
+        if (!backup) {
+            // if current node does not have rk and email of `id`, just return empty data
+            return JSON.stringify({ data: {} });
+        }
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
         this.codeDB.del(id);
-        const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
-        const { rk } = stored[this.pre.serialize(this.pk)];
+        const { rk } = backup;
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
         return JSON.stringify({ // TODO: encrypt decrypted data using user's new publicKey
