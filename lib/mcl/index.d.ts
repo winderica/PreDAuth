@@ -21,7 +21,7 @@ declare module 'mcl' {
 
             deserialize(s: string): void;
 
-            serialize(): string;
+            serialize(): Uint8Array;
 
             setStr(s: string, base?: number): void;
 
@@ -47,7 +47,7 @@ declare module 'mcl' {
 
             deserialize(s: string): void;
 
-            serialize(): string;
+            serialize(): Uint8Array;
 
             setStr(s: string, base?: number): void;
 
@@ -69,7 +69,7 @@ declare module 'mcl' {
 
             deserialize(s: string): void;
 
-            serialize(): string;
+            serialize(): Uint8Array;
 
             isEqual(rhs: Common): boolean;
 
@@ -85,7 +85,7 @@ declare module 'mcl' {
 
             deserialize(s: string): void;
 
-            serialize(): string;
+            serialize(): Uint8Array;
 
             setStr(s: string, base?: number): void;
 
@@ -103,7 +103,7 @@ declare module 'mcl' {
 
             deserialize(s: string): void;
 
-            serialize(): string;
+            serialize(): Uint8Array;
 
             setStr(s: string, base?: number): void;
 
@@ -123,7 +123,7 @@ declare module 'mcl' {
 
             deserialize(s: string): void;
 
-            serialize(): string;
+            serialize(): Uint8Array;
 
             setStr(s: string, base?: number): void;
 
