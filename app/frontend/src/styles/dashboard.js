@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
+export const useStyles = makeStyles(({ palette }) => ({
     root: {
         height: '100%',
         background: palette.primary[50],
@@ -13,11 +13,4 @@ export const useStyles = makeStyles(({ spacing, palette, transitions }) => ({
         flexDirection: 'column',
         alignItems: 'center',
     },
-    expand: ({ expanded }) => ({
-        transform: `rotate(${expanded ? 180 : 0}deg)`,
-        marginLeft: 'auto',
-        transition: transitions.create('transform', {
-            duration: transitions.duration.shortest,
-        }),
-    })
 }));

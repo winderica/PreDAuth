@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Card, CardContent, Paper, TextField, Typography } from '@material-ui/core';
 import YouChat from '../assets/YouChat.png';
 
@@ -6,7 +6,24 @@ import { useStyles } from '../styles/signup';
 
 export const Signup = () => {
     const classes = useStyles();
-    return (
+    const [appInfo, setAppInfo] = useState(null);
+    useEffect(() => {
+        void (async () => {
+            const appInfo = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/appInfo`, { credentials: 'include' })).json();
+            setAppInfo(appInfo);
+        })();
+    }, []);
+    const handleClick = () => {
+        window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
+            type: 'get',
+            id: 'YouChat',
+            pk: appInfo.pk,
+            callback: appInfo.callback,
+            redirect: `${process.env.REACT_APP_APP_FRONTEND}/dashboard`,
+            data: appInfo.data,
+        }))}`;
+    };
+    return appInfo && (
         <div className={classes.root}>
             <Paper className={classes.container} elevation={10}>
                 <div className={classes.header}>
@@ -20,7 +37,7 @@ export const Signup = () => {
                         <TextField variant="outlined" label='用户名' fullWidth />
                         <TextField variant="outlined" label='密码' type='password' fullWidth />
                         <Button fullWidth variant='contained' color='primary' size='large'>注册</Button>
-                        <Button fullWidth variant='outlined' color='primary' size='large'>使用PreDAuth登录</Button>
+                        <Button fullWidth variant='outlined' color='primary' size='large' onClick={handleClick}>使用PreDAuth登录</Button>
                         <Typography variant='caption' color='textSecondary'>* 注册即代表您同意我们的服务条款与隐私政策</Typography>
                     </CardContent>
                 </Card>
