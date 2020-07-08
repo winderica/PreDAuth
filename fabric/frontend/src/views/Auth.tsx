@@ -4,6 +4,7 @@ import { Redirect, RouteComponentProps } from '@reach/router';
 import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 
 import { Table } from '../components/Table';
+import { Timer } from '../components/Timer';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
@@ -12,7 +13,6 @@ import { api } from '../api';
 import { UserDataStore } from '../stores';
 import { apiWrapper } from '../utils/apiWrapper';
 import { encrypt } from '../utils/aliceWrapper';
-import { Timer } from '../components/Timer';
 
 interface AuthGettingRequest {
     type: 'get';
@@ -36,6 +36,7 @@ type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
 const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request }) => {
     const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
+    useUserData();
     const alice = useAlice();
     const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
     const handleAuth = async () => {
@@ -82,6 +83,7 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
 
 const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request }) => {
     const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
+    useUserData();
     const alice = useAlice();
     const deltaDataStore = new UserDataStore(Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])));
     const handleAuth = async () => {
@@ -110,7 +112,6 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request })
 export const Auth = observer<FC<RouteComponentProps>>(() => {
     const { identityStore } = useStores();
     const request = useUrlParams<AuthRequest>('request');
-    useUserData();
 
     return !identityStore.id || !request ? <Redirect to='/' noThrow /> : (
         <Card>
