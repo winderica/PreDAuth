@@ -12,12 +12,14 @@ import { api } from '../api';
 import { UserDataStore } from '../stores';
 import { apiWrapper } from '../utils/apiWrapper';
 import { encrypt } from '../utils/aliceWrapper';
+import { Timer } from '../components/Timer';
 
 interface AuthGettingRequest {
     type: 'get';
     id: string;
     pk: string;
     callback: string;
+    redirect: string;
     data: string[];
 }
 
@@ -26,25 +28,30 @@ interface AuthSettingRequest {
     id: string;
     pk: string;
     callback: string;
+    redirect: string;
     data: Record<string, string>;
 }
 
 type AuthRequest = AuthGettingRequest | AuthSettingRequest;
 
 const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request }) => {
-    const { identityStore, keyStore, userDataStore } = useStores();
+    const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
     const alice = useAlice();
     const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
     const handleAuth = async () => {
-        const data: Record<string, string> = {};
-        Object.entries(checked).filter(([, value]) => value).forEach(([tag]) => {
-            data[tag] = alice.reKey(request.pk, keyStore.dataKey[tag].sk);
-        });
+        const data = Object.fromEntries(
+            Object.entries(userDataStore.dataGroupedByTag)
+                .filter(([, data]) => Object.keys(data).filter((key) => checked[key]).length)
+                .map(([tag]) => [tag, alice.reKey(request.pk, keyStore.dataKey[tag].sk)])
+        );
         await apiWrapper(
             () => api.reEncrypt(identityStore.id, identityStore.key, request.callback, data),
             '正在提交重加密密钥',
             '成功提交重加密密钥'
         );
+        notificationStore.enqueueInfo(<>
+            页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
+        </>);
     };
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +81,7 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
 });
 
 const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request }) => {
-    const { userDataStore, identityStore, keyStore } = useStores();
+    const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
     const alice = useAlice();
     const deltaDataStore = new UserDataStore(Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])));
     const handleAuth = async () => {
@@ -84,6 +91,9 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request })
             await api.setData(identityStore.id, identityStore.key, encrypted);
             await keyStore.set(dataKey);
         }, '正在提交加密数据', '成功加密并提交');
+        notificationStore.enqueueInfo(<>
+            页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
+        </>);
     };
 
     return <>
