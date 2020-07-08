@@ -25,7 +25,7 @@ export const useStyles = makeStyles(({ spacing, palette }) => ({
     },
     logo: {
         width: '90%',
-        filter: `drop-shadow(30px 10px 4px ${palette.primary[300]});`
+        filter: `drop-shadow(30px 10px 4px ${palette.primary[300]})`
     },
     card: {
         marginLeft: 'auto',
