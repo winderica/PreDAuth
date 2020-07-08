@@ -50,14 +50,14 @@ export class PRE {
         return this.mcl.mul(pkb, this.mcl.inv(ska)); // RK = PKb^(1/SKa) = h^(b/a)
     }
 
-    reEncrypt({ ca0, ca1 }: { ca0: Fr; ca1: G1 }, reKey: G2) {
-        const cb1 = this.mcl.pairing(ca1, reKey); // Cb1 = e(g^(ra), h^(b/a)) = e(g, h)^(rb) = Z^(rb)
-        return { cb0: ca0, cb1 }; // Cb0 = Ca0
+    reEncrypt({ ca0, ca1 }: { ca0: string; ca1: string }, reKey: string) {
+        const cb1 = this.mcl.pairing(this.deserialize(ca1, 'G1'), this.deserialize(reKey, 'G2')); // Cb1 = e(g^(ra), h^(b/a)) = e(g, h)^(rb) = Z^(rb)
+        return { cb0: ca0, cb1: this.serialize(cb1) }; // Cb0 = Ca0
     }
 
-    reDecrypt({ cb0, cb1 }: { cb0: Fr; cb1: GT }, sk: Fr) {
-        const divisor = this.mcl.pow(cb1, this.mcl.inv(sk)); // (Z^(rb))^(1/Skb) = (Z^(rb))^(1/b) = Z^r
-        const reDecrypted = this.mcl.sub(cb0, this.mcl.hashToFr(divisor.serialize())); // Cb0/Z^r = m*Z^r/Z^r = m
+    reDecrypt({ cb0, cb1 }: { cb0: string; cb1: string }, sk: Fr) {
+        const divisor = this.mcl.pow(this.deserialize(cb1, 'GT'), this.mcl.inv(sk)); // (Z^(rb))^(1/Skb) = (Z^(rb))^(1/b) = Z^r
+        const reDecrypted = this.mcl.sub(this.deserialize(cb0, 'Fr'), this.mcl.hashToFr(divisor.serialize())); // Cb0/Z^r = m*Z^r/Z^r = m
         return this.serialize(reDecrypted);
     }
 
