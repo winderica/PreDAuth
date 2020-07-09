@@ -15,9 +15,6 @@ export const useStyles = makeStyles(() => ({
         '*': {
             '-webkit-tap-highlight-color': 'transparent',
         },
-        'html, body': {
-            margin: 0
-        },
     },
 }));
 

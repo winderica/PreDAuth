@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import { SnackbarProvider } from 'notistack';
-import { ThemeProvider } from '@material-ui/core';
+import { CssBaseline, ThemeProvider } from '@material-ui/core';
 import { LocationProvider, Router } from '@reach/router';
 
 import { AliceProvider } from '../providers/alice';
@@ -16,23 +16,25 @@ import { Recover } from './Recover';
 export const App: FC = () => {
     useStyles();
     return (
-        <ThemeProvider theme={theme}>
-            <SnackbarProvider maxSnack={5}>
-                <LocationProvider>
-                    <Frame>
-                        <AliceProvider>
-                            <Router>
-                                <Home path='/' />
-                                <Data path='/data' />
-                                <Auth path='/auth' />
-                                <Backup path='/backup' />
-                                <Register path='/register' />
-                                <Recover path='/recover' />
-                            </Router>
-                        </AliceProvider>
-                    </Frame>
-                </LocationProvider>
-            </SnackbarProvider>
-        </ThemeProvider>
+        <CssBaseline>
+            <ThemeProvider theme={theme}>
+                <SnackbarProvider maxSnack={5}>
+                    <LocationProvider>
+                        <Frame>
+                            <AliceProvider>
+                                <Router primary={false} component={({ children }) => <>{children}</>}>
+                                    <Home path='/' />
+                                    <Data path='/data' />
+                                    <Auth path='/auth' />
+                                    <Backup path='/backup' />
+                                    <Register path='/register' />
+                                    <Recover path='/recover' />
+                                </Router>
+                            </AliceProvider>
+                        </Frame>
+                    </LocationProvider>
+                </SnackbarProvider>
+            </ThemeProvider>
+        </CssBaseline>
     );
 };
