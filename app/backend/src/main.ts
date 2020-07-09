@@ -37,9 +37,14 @@ void (async () => {
             if (!req.session) {
                 throw new Error('This will never happen');
             }
-            const token = randomString();
-            req.session.token = token;
-            res.json({ pk: bob.pk, data: ['name', 'avatar', 'city', 'bio'], callback: `http://127.0.0.1:4001/decrypt/${token}` });
+            if (!req.session.token) {
+                req.session.token = randomString();
+            }
+            res.json({
+                pk: bob.pk,
+                data: ['name', 'avatar', 'city', 'bio'],
+                callback: `http://127.0.0.1:4001/decrypt/${req.session.token as string}`
+            });
         });
 
         app.get('/data', (req, res) => {
