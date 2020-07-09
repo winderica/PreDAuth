@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import { Button } from '@material-ui/core';
 import { Redirect, RouteComponentProps } from '@reach/router';
@@ -11,6 +12,7 @@ import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { apiWrapper } from '../utils/apiWrapper';
 import { encrypt } from '../utils/aliceWrapper';
+import { UserDataStore } from '../stores';
 
 export const Data = observer<FC<RouteComponentProps>>(() => {
     const classes = useStyles();
@@ -21,7 +23,9 @@ export const Data = observer<FC<RouteComponentProps>>(() => {
     }
     const alice = useAlice();
     useUserData();
+    const tempDataStore = new UserDataStore(toJS(userDataStore.data));
     const handleEncrypt = async () => {
+        userDataStore.setAll(toJS(tempDataStore.data));
         const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArrayGroupedByTag);
         await apiWrapper(async () => {
             await api.setData(identityStore.id, identityStore.key, encrypted);
@@ -30,10 +34,7 @@ export const Data = observer<FC<RouteComponentProps>>(() => {
     };
     return (
         <div className={classes.container}>
-            <Table
-                title='个人信息'
-                dataStore={userDataStore}
-            />
+            <Table title='个人信息' dataStore={tempDataStore} />
             <Button
                 onClick={handleEncrypt}
                 variant='contained'

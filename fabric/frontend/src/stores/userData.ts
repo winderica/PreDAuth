@@ -4,7 +4,16 @@ export class UserDataStore {
     @observable
     data: Record<string, { value: string; tag: string; }>;
 
+    @observable
+    initialized: boolean;
+
     constructor(data: Record<string, { value: string; tag: string; }> = {}) {
+        this.data = data;
+        this.initialized = false;
+    }
+
+    @action
+    setAll(data: Record<string, { value: string; tag: string; }>) {
         this.data = data;
     }
 
@@ -16,6 +25,11 @@ export class UserDataStore {
     @action
     del(name: string) {
         delete this.data[name];
+    }
+
+    @action
+    setInitialized(initialized = true) {
+        this.initialized = initialized;
     }
 
     @computed
