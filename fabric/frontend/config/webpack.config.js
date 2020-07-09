@@ -251,7 +251,10 @@ module.exports = function (webpackEnv) {
             net: 'empty',
             tls: 'empty',
             child_process: 'empty',
+            // I guess node crypto is bundled due to `mcl.js`, but in fact node crypto is not needed
+            crypto: 'empty'
         },
         performance: false,
+        externals: /jspdf.*/
     };
 };
