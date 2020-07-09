@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useState } from 'react';
+import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
 import { Redirect, RouteComponentProps } from '@reach/router';
 import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, Typography } from '@material-ui/core';
@@ -110,13 +110,35 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request })
 });
 
 export const Auth = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore } = useStores();
+    const { identityStore, notificationStore } = useStores();
     const request = useUrlParams<AuthRequest>('request');
 
-    return !identityStore.id || !request ? <Redirect to='/' noThrow /> : (
-        <Card>
-            <CardHeader title='授权应用' />
-            {request.type === 'get' ? <AuthGetting request={request} /> : <AuthSetting request={request} />}
-        </Card>
-    );
+    useEffect(() => {
+        if (!request) {
+            notificationStore.enqueueWarning('授权请求格式错误');
+        }
+    }, []);
+
+    if (!identityStore.id) {
+        return <Redirect to='/' noThrow />;
+    }
+
+    switch (request?.type) {
+        case 'get':
+            return (
+                <Card>
+                    <CardHeader title='授权获取信息' />
+                    <AuthGetting request={request} />
+                </Card>
+            );
+        case 'set':
+            return (
+                <Card>
+                    <CardHeader title='授权更新信息' />
+                    <AuthSetting request={request} />
+                </Card>
+            );
+        default:
+            return <></>;
+    }
 });
