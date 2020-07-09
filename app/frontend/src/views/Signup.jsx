@@ -4,15 +4,19 @@ import YouChat from '../assets/YouChat.png';
 
 import { useStyles } from '../styles/signup';
 
-export const Signup = () => {
+export const Signup = ({ navigate }) => {
     const classes = useStyles();
     const [appInfo, setAppInfo] = useState(null);
     useEffect(() => {
         void (async () => {
             const appInfo = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/appInfo`, { credentials: 'include' })).json();
             setAppInfo(appInfo);
+            const { loggedIn } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/status`, { credentials: 'include' })).json();
+            if (loggedIn) {
+                await navigate('/dashboard');
+            }
         })();
-    }, []);
+    }, [navigate]);
     const handleClick = () => {
         window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
             type: 'get',
