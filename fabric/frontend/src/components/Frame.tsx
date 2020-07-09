@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { observer } from 'mobx-react';
-import { Backup, Fingerprint, List } from '@material-ui/icons';
+import { Backup, Fingerprint, List, Home } from '@material-ui/icons';
 
 import { AppBar } from './AppBar';
 import { Menu } from './Menu';
@@ -11,6 +11,7 @@ import { useStyles } from '../styles/frame';
 import { Progress } from './Progress';
 
 const listItems = [
+    { to: '/', text: 'home', icon: <Home /> },
     { to: '/data', text: 'data', icon: <List /> },
     { to: '/auth', text: 'auth', icon: <Fingerprint /> },
     { to: '/backup', text: 'backup', icon: <Backup /> },
