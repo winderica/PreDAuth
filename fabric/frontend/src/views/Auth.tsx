@@ -46,13 +46,13 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
                 .map(([tag]) => [tag, alice.reKey(request.pk, keyStore.dataKey[tag].sk)])
         );
         await apiWrapper(
-            () => api.reEncrypt(identityStore.id, identityStore.key, request.callback, data),
-            '正在提交重加密密钥',
-            '成功提交重加密密钥'
+            async () => {
+                await api.reEncrypt(identityStore.id, identityStore.key, request.callback, data);
+                notificationStore.enqueueInfo(<>
+                    页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
+                </>);
+            }, '正在提交重加密密钥', '成功提交重加密密钥'
         );
-        notificationStore.enqueueInfo(<>
-            页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
-        </>);
     };
 
     const handleCheck = (event: ChangeEvent<HTMLInputElement>) => {
@@ -92,10 +92,10 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request })
         await apiWrapper(async () => {
             await api.setData(identityStore.id, identityStore.key, encrypted);
             await keyStore.set(dataKey);
+            notificationStore.enqueueInfo(<>
+                页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
+            </>);
         }, '正在提交加密数据', '成功加密并提交');
-        notificationStore.enqueueInfo(<>
-            页面将在<Timer time={5} key={performance.now()} onTimeout={() => location.href = request.redirect} />秒后跳转
-        </>);
     };
 
     return <>
