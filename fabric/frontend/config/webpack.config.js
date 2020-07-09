@@ -9,6 +9,8 @@ const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeM
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 const webpackDevClientEntry = require.resolve('react-dev-utils/webpackHotDevClient');
+const TerserPlugin = require('terser-webpack-plugin');
+
 const paths = require('./paths');
 const modules = require('./modules');
 const getClientEnvironment = require('./env');
@@ -61,7 +63,32 @@ module.exports = function (webpackEnv) {
         },
         optimization: {
             minimize: isEnvProduction,
-            minimizer: [],
+            minimizer: [
+                new TerserPlugin({
+                    terserOptions: {
+                        parse: {
+                            ecma: 8,
+                        },
+                        compress: {
+                            ecma: 5,
+                            warnings: false,
+                            comparisons: false,
+                            inline: 2,
+                        },
+                        mangle: {
+                            safari10: true,
+                        },
+                        keep_classnames: isEnvProductionProfile,
+                        keep_fnames: isEnvProductionProfile,
+                        output: {
+                            ecma: 5,
+                            comments: false,
+                            ascii_only: true,
+                        },
+                    },
+                    sourceMap: shouldUseSourceMap,
+                }),
+            ],
             splitChunks: {
                 chunks: 'all',
                 name: false,
