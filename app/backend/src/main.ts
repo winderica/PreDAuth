@@ -39,7 +39,7 @@ void (async () => {
             }
             const token = randomString();
             req.session.token = token;
-            res.json({ pk: bob.pk, data: ['aaa', 'bbb'], callback: `http://127.0.0.1:4001/decrypt/${token}` });
+            res.json({ pk: bob.pk, data: ['name', 'avatar', 'city', 'bio'], callback: `http://127.0.0.1:4001/decrypt/${token}` });
         });
 
         app.get('/data', (req, res) => {
