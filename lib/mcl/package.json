@@ -1,6 +1,35 @@
 {
-  "name": "mcl",
-  "version": "1.0.2",
+  "name": "mcl-wasm",
+  "version": "0.4.3",
+  "description": "mcl ; A portable and fast pairing-based cryptography library for Node.js by WebAssembly",
   "main": "mcl.js",
-  "types": "./index.d.ts"
+  "types": "./index.d.ts",
+  "scripts": {
+    "lint": "standard mcl.js test.js",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/herumi/mcl-wasm.git"
+  },
+  "keywords": [
+    "elliptic curve",
+    "WebAssembly",
+    "pairing"
+  ],
+  "author": "herumi <herumi@nifty.com> (https://github.com/herumi/)",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/herumi/mcl-wasm/issues"
+  },
+  "engines": {
+    "node": ">=8.9.0"
+  },
+  "homepage": "https://github.com/herumi/mcl-wasm#readme",
+  "devDependencies": {
+    "coveralls": "^3.0.1",
+    "istanbul": "^0.4.5",
+    "nyc": "^11.8.0",
+    "standard": "^10.0.3"
+  }
 }
