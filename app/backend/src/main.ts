@@ -50,6 +50,14 @@ void (async () => {
             res.json({ data: fakeDB[token] });
         });
 
+        app.get('/status', (req, res) => {
+            if (!req.session) {
+                throw new Error('This will never happen');
+            }
+            const token: string = req.session.token;
+            res.json({ loggedIn: !!fakeDB[token] });
+        });
+
         app.post('/decrypt/:token', (req, res) => {
             const token: string = req.params.token;
             const data: Record<string, { data: string; key: { cb0: string; cb1: string }; iv: string }> = req.body;
