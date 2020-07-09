@@ -4,8 +4,16 @@ export class ComponentStateStore {
     @observable
     progressOn = false;
 
+    @observable
+    recovered = false;
+
     @action
-    setProgress(on: boolean) {
+    setProgress(on = true) {
         this.progressOn = on;
+    }
+
+    @action
+    setRecovered(recovered = true) {
+        this.recovered = recovered;
     }
 }

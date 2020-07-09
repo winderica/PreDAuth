@@ -7,8 +7,8 @@ import { api } from '../api';
 import { useStores } from '../hooks/useStores';
 import { apiWrapper } from '../utils/apiWrapper';
 
-export const Recover = observer<FC<RouteComponentProps>>(() => {
-    const { identityStore, userDataStore } = useStores();
+export const Recover = observer<FC<RouteComponentProps>>(({ navigate }) => {
+    const { identityStore, userDataStore, componentStateStore } = useStores();
     const [email, setEmail] = useState('');
     const [id, setId] = useState('');
     const [codes, setCodes] = useState(['', '']);
@@ -34,6 +34,12 @@ export const Recover = observer<FC<RouteComponentProps>>(() => {
                 });
             });
         });
+        userDataStore.setInitialized();
+        componentStateStore.setRecovered();
+        if (!navigate) {
+            throw new Error('How could this happen?');
+        }
+        await navigate('/register');
     }, '正在请求恢复数据', '成功获取恢复数据');
     return identityStore.id ? <Redirect to='/' noThrow /> : <>
         <TextField
