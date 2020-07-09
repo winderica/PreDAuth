@@ -188,3 +188,7 @@ cd fabric/network/
 ```shell script
 ./network.sh deployCC -n PreDAuth
 ```
+
+### Certificates
+
+All the certificates in this project are self-signed certificates just for test/dev purpose, so you should trust them in your system/browser settings.
