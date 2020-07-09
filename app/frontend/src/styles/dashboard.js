@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles(({ palette }) => ({
+export const useStyles = makeStyles(({ palette, spacing }) => ({
     root: {
         height: '100%',
         background: palette.primary[50],
@@ -10,7 +10,13 @@ export const useStyles = makeStyles(({ palette }) => ({
     },
     content: {
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
     },
+    avatar: {
+        width: spacing(10),
+        height: spacing(10)
+    },
+    profile: {
+        marginLeft: spacing(2),
+        minWidth: spacing(40)
+    }
 }));
