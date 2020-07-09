@@ -3,7 +3,7 @@ import { random } from '../utils/random';
 import { exportPublicKey, sign } from '../utils/ecdsa';
 import { Encrypted } from '../utils/alice';
 
-export class ENDPOINT {
+class ENDPOINT {
     static base = 'https://api.predauth.com:4000';
     static register = (id: string) => `${ENDPOINT.base}/user/${id}`;
     static data = (id: string) => `${ENDPOINT.base}/user/${id}/data`;
