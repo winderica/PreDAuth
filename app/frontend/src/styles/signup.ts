@@ -1,9 +1,10 @@
 import { makeStyles } from '@material-ui/core/styles';
+import { primary } from './global';
 
 export const useStyles = makeStyles(({ spacing, palette }) => ({
     root: {
         height: '100%',
-        background: palette.primary[50],
+        background: primary[50],
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -13,7 +14,7 @@ export const useStyles = makeStyles(({ spacing, palette }) => ({
         alignItems: 'center',
         width: '90%',
         height: '90%',
-        background: `linear-gradient(95deg, ${palette.primary[200]} 49%, #ffffff 50%)`,
+        background: `linear-gradient(95deg, ${primary[200]} 49%, #ffffff 50%)`,
     },
     header: {
         marginLeft: '10%',
@@ -25,7 +26,7 @@ export const useStyles = makeStyles(({ spacing, palette }) => ({
     },
     logo: {
         width: '90%',
-        filter: `drop-shadow(30px 10px 4px ${palette.primary[300]})`
+        filter: `drop-shadow(30px 10px 4px ${primary[300]})`
     },
     card: {
         marginLeft: 'auto',

@@ -1,18 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Button, Card, CardContent, Paper, TextField, Typography } from '@material-ui/core';
 import YouChat from '../assets/YouChat.png';
 
 import { useStyles } from '../styles/signup';
+import { RouteComponentProps } from '@reach/router';
 
-export const Signup = ({ navigate }) => {
+interface AppInfo {
+    pk: string;
+    callback: string;
+    data: string;
+}
+
+export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
     const classes = useStyles();
-    const [appInfo, setAppInfo] = useState(null);
+    const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
     useEffect(() => {
         void (async () => {
             const appInfo = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/appInfo`, { credentials: 'include' })).json();
             setAppInfo(appInfo);
             const { loggedIn } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/status`, { credentials: 'include' })).json();
             if (loggedIn) {
+                if (!navigate) {
+                    throw new Error('How could this happen?');
+                }
                 await navigate('/dashboard');
             }
         })();
@@ -21,10 +31,10 @@ export const Signup = ({ navigate }) => {
         window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
             type: 'get',
             id: 'YouChat',
-            pk: appInfo.pk,
-            callback: appInfo.callback,
+            pk: appInfo?.pk,
+            callback: appInfo?.callback,
             redirect: `${process.env.REACT_APP_APP_FRONTEND}/dashboard`,
-            data: appInfo.data,
+            data: appInfo?.data,
         }))}`;
     };
     return appInfo && (

@@ -1,24 +1,35 @@
-import React, { useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Avatar, Card, CardContent, CardHeader, Divider, Typography } from '@material-ui/core';
 import { useStyles } from '../styles/dashboard';
+import { RouteComponentProps } from '@reach/router';
 
-const isValid = (data) => {
+interface Data {
+    name: string;
+    avatar: string;
+    bio: string;
+    city: string;
+}
+
+const isValid = (data: Data | null) => {
     return Boolean(data && data.name && data.avatar && data.bio && data.city);
 };
 
-export const Dashboard = ({ navigate }) => {
-    const [data, setData] = useState(null);
+export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
+    const [data, setData] = useState<Data | null>(null);
     useEffect(() => {
         void (async () => {
             const { data } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/data`, { credentials: 'include' })).json();
             setData(data);
             if (!isValid(data)) {
+                if (!navigate) {
+                    throw new Error('How could this happen?');
+                }
                 await navigate('/');
             }
         })();
     }, [navigate]);
     const classes = useStyles();
-    return data && (
+    return data && isValid(data) ? (
         <div className={classes.root}>
             <Card elevation={10}>
                 <CardHeader title='Welcome' />
@@ -33,5 +44,5 @@ export const Dashboard = ({ navigate }) => {
                 </CardContent>
             </Card>
         </div>
-    );
+    ) : null;
 };
