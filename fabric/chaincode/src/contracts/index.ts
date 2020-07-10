@@ -1,18 +1,18 @@
 import { Context, Contract } from 'fabric-contract-api';
-import { BackupLedger, DataLedger, IdentityLedger, RecoveryLedger } from '../ledger';
+import { BackupLedger, DataLedger, IdentityLedger, PrivateLedger, RecoveryLedger } from '../ledger';
 import { verify } from '../utils/ecdsa';
 import { AES } from '../utils/aes';
 import { randomCode } from '../utils/code';
 import { Fr, G1, G2, PRE } from '../utils/pre';
 import { mailto } from '../utils/mail';
 import { Backup, Data, PK, Request, RK } from '../constants/types';
-import { CodeDB } from '../db';
 
 class PreDAuthContext extends Context {
     data: DataLedger;
     identity: IdentityLedger;
     recovery: RecoveryLedger;
     backup: BackupLedger;
+    private: PrivateLedger;
 
     constructor() {
         super();
@@ -20,6 +20,7 @@ class PreDAuthContext extends Context {
         this.data = new DataLedger(this);
         this.identity = new IdentityLedger(this);
         this.recovery = new RecoveryLedger(this);
+        this.private = new PrivateLedger(this);
     }
 }
 
@@ -29,12 +30,6 @@ export class PreDAuth extends Contract {
     h!: G2;
     private sk!: Fr;
     private pk!: G2;
-    codeDB: CodeDB;
-
-    constructor() {
-        super();
-        this.codeDB = new CodeDB();
-    }
 
     createContext() {
         return new PreDAuthContext();
@@ -120,7 +115,7 @@ export class PreDAuth extends Contract {
             throw new Error('Verification failed');
         }
         const code = randomCode();
-        this.codeDB.set(id, { code, time: Date.now() });
+        await ctx.private.set(id, JSON.stringify({ code, time: Date.now() }));
         await ctx.recovery.set([id], 'true');
         await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
@@ -133,11 +128,10 @@ export class PreDAuth extends Contract {
             // if current node does not have rk and email of `id`, just return empty data
             return JSON.stringify({ data: {} });
         }
-        const { code, time } = this.codeDB.get(id);
+        const { code, time } = JSON.parse(await ctx.private.get(id));
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
-        this.codeDB.del(id);
         const { rk } = backup;
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
