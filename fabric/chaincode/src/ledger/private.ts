@@ -1,5 +1,9 @@
 import { Context } from 'fabric-contract-api';
 
+const msp2name = (msp: string) => {
+    return '_implicit_org_' + msp;
+};
+
 export class PrivateLedger {
     readonly #ctx: Context;
 
@@ -7,25 +11,20 @@ export class PrivateLedger {
         this.#ctx = ctx;
     }
 
-    private name() {
-        // https://github.com/hyperledger/fabric-chaincode-node/pull/185
-        return '_implicit_org_' + (this.#ctx.stub as unknown as { getMspID: () => string; }).getMspID();
-    }
-
-    async set(id: string, state: string) {
+    async set(msp: string, id: string, state: string) {
         await this.#ctx.stub.putPrivateData(
-            this.name(),
+            msp2name(msp),
             id,
             Buffer.from(state)
         );
     }
 
-    async get(id: string) {
-        const data = await this.#ctx.stub.getPrivateData(this.name(), id);
+    async get(msp: string, id: string) {
+        const data = await this.#ctx.stub.getPrivateData(msp2name(msp), id);
         return Buffer.from(data).toString('utf8');
     }
 
-    async del(id: string) {
-        await this.#ctx.stub.deletePrivateData(this.name(), id);
+    async del(msp: string, id: string) {
+        await this.#ctx.stub.deletePrivateData(msp2name(msp), id);
     }
 }

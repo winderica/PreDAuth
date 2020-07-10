@@ -1,5 +1,5 @@
 import { Context, Contract } from 'fabric-contract-api';
-import { BackupLedger, DataLedger, IdentityLedger, PrivateLedger, RecoveryLedger } from '../ledger';
+import { BackupLedger, DataLedger, IdentityLedger, PrivateLedger } from '../ledger';
 import { verify } from '../utils/ecdsa';
 import { AES } from '../utils/aes';
 import { randomCode } from '../utils/code';
@@ -10,7 +10,6 @@ import { Backup, Data, PK, Request, RK } from '../constants/types';
 class PreDAuthContext extends Context {
     data: DataLedger;
     identity: IdentityLedger;
-    recovery: RecoveryLedger;
     backup: BackupLedger;
     private: PrivateLedger;
 
@@ -19,7 +18,6 @@ class PreDAuthContext extends Context {
         this.backup = new BackupLedger(this);
         this.data = new DataLedger(this);
         this.identity = new IdentityLedger(this);
-        this.recovery = new RecoveryLedger(this);
         this.private = new PrivateLedger(this);
     }
 }
@@ -103,20 +101,18 @@ export class PreDAuth extends Contract {
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
-        const { payload: { email } }: Request<{ email: string; }> = JSON.parse(request);
+        const { payload: { email, msp } }: Request<{ email: string; msp: string; }> = JSON.parse(request);
         const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
         const backup = stored[this.pre.serialize(this.pk)];
         if (!backup) {
-            // if current node does not have rk and email of `id`, just alter the state of ledger
-            await ctx.recovery.set([id], 'true');
+            // if current node does not have rk and email of `id`, just return nothing
             return;
         }
         if (backup.email !== email) {
             throw new Error('Verification failed');
         }
         const code = randomCode();
-        await ctx.private.set(id, JSON.stringify({ code, time: Date.now() }));
-        await ctx.recovery.set([id], 'true');
+        await ctx.private.set(msp, id, JSON.stringify({ code, time: Date.now() }));
         await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
 
@@ -128,7 +124,8 @@ export class PreDAuth extends Contract {
             // if current node does not have rk and email of `id`, just return empty data
             return JSON.stringify({ data: {} });
         }
-        const { code, time } = JSON.parse(await ctx.private.get(id));
+        // https://github.com/hyperledger/fabric-chaincode-node/pull/185
+        const { code, time } = JSON.parse(await ctx.private.get((ctx.stub as unknown as { getMspID: () => string; }).getMspID(), id));
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
