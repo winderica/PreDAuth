@@ -23,11 +23,12 @@ class PreDAuthContext extends Context {
 }
 
 export class PreDAuth extends Contract {
-    pre!: PRE;
-    g!: G1;
-    h!: G2;
-    private sk!: Fr;
-    private pk!: G2;
+    #pre!: PRE;
+    #g!: G1;
+    #h!: G2;
+    #sk!: Fr;
+    #pk!: G2;
+    #msp!: string;
 
     createContext() {
         return new PreDAuthContext();
@@ -36,26 +37,28 @@ export class PreDAuth extends Contract {
     private handleReEncrypt(encrypted: Data, rk: RK) {
         return Object.fromEntries(Object.entries(rk).map(([tag, rk]) => {
             const { key, data, iv } = encrypted[tag];
-            const { cb0, cb1 } = this.pre.reEncrypt(key, rk);
+            const { cb0, cb1 } = this.#pre.reEncrypt(key, rk);
             return [tag, { data, key: { cb0, cb1 }, iv, }];
         }));
     }
 
     private handleReDecrypt(cipher: string, { cb0, cb1 }: { cb0: string; cb1: string }, iv: string) {
-        const aesKey = this.pre.reDecrypt({ cb0, cb1 }, this.sk);
+        const aesKey = this.#pre.reDecrypt({ cb0, cb1 }, this.#sk);
         const aes = new AES(Buffer.from(aesKey, 'hex'), Buffer.from(iv, 'hex'));
         return aes.decrypt(cipher);
     }
 
-    async init(_: PreDAuthContext, str1: string, str2: string) {
-        this.pre = new PRE();
-        await this.pre.init();
-        const { g, h } = this.pre.generatorGen(str1, str2);
-        this.g = g;
-        this.h = h;
-        const { sk, pk } = this.pre.keyGenInG2(h);
-        this.sk = sk;
-        this.pk = pk;
+    async init(ctx: PreDAuthContext, str1: string, str2: string) {
+        this.#pre = new PRE();
+        await this.#pre.init();
+        const { g, h } = this.#pre.generatorGen(str1, str2);
+        this.#g = g;
+        this.#h = h;
+        const { sk, pk } = this.#pre.keyGenInG2(h);
+        this.#sk = sk;
+        this.#pk = pk;
+        // https://github.com/hyperledger/fabric-chaincode-node/pull/185
+        this.#msp = (ctx.stub as unknown as { getMspID: () => string; }).getMspID();
     }
 
     async getIdentity(ctx: PreDAuthContext, id: string) {
@@ -103,7 +106,7 @@ export class PreDAuth extends Contract {
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
         const { payload: { email, msp } }: Request<{ email: string; msp: string; }> = JSON.parse(request);
         const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
-        const backup = stored[this.pre.serialize(this.pk)];
+        const backup = stored[this.#pre.serialize(this.#pk)];
         if (!backup) {
             // if current node does not have rk and email of `id`, just return nothing
             return;
@@ -113,19 +116,20 @@ export class PreDAuth extends Contract {
         }
         const code = randomCode();
         await ctx.private.set(msp, id, JSON.stringify({ code, time: Date.now() }));
-        await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
+        if (msp === this.#msp) {
+            await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
+        }
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
         const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
-        const backup = stored[this.pre.serialize(this.pk)];
+        const backup = stored[this.#pk.serializeToHexStr()];
         if (!backup) {
             // if current node does not have rk and email of `id`, just return empty data
             return JSON.stringify({ data: {} });
         }
-        // https://github.com/hyperledger/fabric-chaincode-node/pull/185
-        const { code, time } = JSON.parse(await ctx.private.get((ctx.stub as unknown as { getMspID: () => string; }).getMspID(), id));
+        const { code, time } = JSON.parse(await ctx.private.get(this.#msp, id));
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
@@ -141,14 +145,14 @@ export class PreDAuth extends Contract {
 
     getGH() {
         return JSON.stringify({
-            g: this.pre.serialize(this.g),
-            h: this.pre.serialize(this.h),
+            g: this.#g.serializeToHexStr(),
+            h: this.#h.serializeToHexStr(),
         });
     }
 
     getPK() {
         return JSON.stringify({
-            pk: this.pre.serialize(this.pk)
+            pk: this.#pk.serializeToHexStr()
         });
     }
 }
