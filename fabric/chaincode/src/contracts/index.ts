@@ -1,34 +1,40 @@
 import { Context, Contract } from 'fabric-contract-api';
-import { BackupLedger, DataLedger, IdentityLedger, PrivateLedger } from '../ledger';
+import { BackupLedger, DataLedger, IdentityLedger, RecoveryLedger } from '../ledger';
 import { verify } from '../utils/ecdsa';
 import { AES } from '../utils/aes';
 import { randomCode } from '../utils/code';
 import { Fr, G1, G2, PRE } from '../utils/pre';
 import { mailto } from '../utils/mail';
 import { Backup, Data, PK, Request, RK } from '../constants/types';
+import { CodeDB } from '../db';
 
 class PreDAuthContext extends Context {
     data: DataLedger;
     identity: IdentityLedger;
+    recovery: RecoveryLedger;
     backup: BackupLedger;
-    private: PrivateLedger;
 
     constructor() {
         super();
         this.backup = new BackupLedger(this);
         this.data = new DataLedger(this);
         this.identity = new IdentityLedger(this);
-        this.private = new PrivateLedger(this);
+        this.recovery = new RecoveryLedger(this);
     }
 }
 
 export class PreDAuth extends Contract {
-    #pre!: PRE;
-    #g!: G1;
-    #h!: G2;
-    #sk!: Fr;
-    #pk!: G2;
-    #msp!: string;
+    pre!: PRE;
+    g!: G1;
+    h!: G2;
+    private sk!: Fr;
+    private pk!: G2;
+    codeDB: CodeDB;
+
+    constructor() {
+        super();
+        this.codeDB = new CodeDB();
+    }
 
     createContext() {
         return new PreDAuthContext();
@@ -37,28 +43,26 @@ export class PreDAuth extends Contract {
     private handleReEncrypt(encrypted: Data, rk: RK) {
         return Object.fromEntries(Object.entries(rk).map(([tag, rk]) => {
             const { key, data, iv } = encrypted[tag];
-            const { cb0, cb1 } = this.#pre.reEncrypt(key, rk);
+            const { cb0, cb1 } = this.pre.reEncrypt(key, rk);
             return [tag, { data, key: { cb0, cb1 }, iv, }];
         }));
     }
 
     private handleReDecrypt(cipher: string, { cb0, cb1 }: { cb0: string; cb1: string }, iv: string) {
-        const aesKey = this.#pre.reDecrypt({ cb0, cb1 }, this.#sk);
+        const aesKey = this.pre.reDecrypt({ cb0, cb1 }, this.sk);
         const aes = new AES(Buffer.from(aesKey, 'hex'), Buffer.from(iv, 'hex'));
         return aes.decrypt(cipher);
     }
 
-    async init(ctx: PreDAuthContext, str1: string, str2: string) {
-        this.#pre = new PRE();
-        await this.#pre.init();
-        const { g, h } = this.#pre.generatorGen(str1, str2);
-        this.#g = g;
-        this.#h = h;
-        const { sk, pk } = this.#pre.keyGenInG2(h);
-        this.#sk = sk;
-        this.#pk = pk;
-        // https://github.com/hyperledger/fabric-chaincode-node/pull/185
-        this.#msp = (ctx.stub as unknown as { getMspID: () => string; }).getMspID();
+    async init(_: PreDAuthContext, str1: string, str2: string) {
+        this.pre = new PRE();
+        await this.pre.init();
+        const { g, h } = this.pre.generatorGen(str1, str2);
+        this.g = g;
+        this.h = h;
+        const { sk, pk } = this.pre.keyGenInG2(h);
+        this.sk = sk;
+        this.pk = pk;
     }
 
     async getIdentity(ctx: PreDAuthContext, id: string) {
@@ -104,35 +108,36 @@ export class PreDAuth extends Contract {
     }
 
     async verifyEmail(ctx: PreDAuthContext, id: string, request: string) {
-        const { payload: { email, msp } }: Request<{ email: string; msp: string; }> = JSON.parse(request);
+        const { payload: { email } }: Request<{ email: string; }> = JSON.parse(request);
         const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
-        const backup = stored[this.#pre.serialize(this.#pk)];
+        const backup = stored[this.pre.serialize(this.pk)];
         if (!backup) {
-            // if current node does not have rk and email of `id`, just return nothing
+            // if current node does not have rk and email of `id`, just alter the state of ledger
+            await ctx.recovery.set([id], 'true');
             return;
         }
         if (backup.email !== email) {
             throw new Error('Verification failed');
         }
         const code = randomCode();
-        await ctx.private.set(msp, id, JSON.stringify({ code, time: Date.now() }));
-        if (msp === this.#msp) {
-            await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
-        }
+        this.codeDB.set(id, { code, time: Date.now() });
+        await ctx.recovery.set([id], 'true');
+        await mailto({ from: 'PreDAuth', to: email, subject: 'Verification Code', text: code });
     }
 
     async recover(ctx: PreDAuthContext, id: string, request: string) {
         const { payload }: Request<{ codes: string[]; }> = JSON.parse(request);
         const stored: { [pk: string]: Backup } = JSON.parse(await ctx.backup.get([id]));
-        const backup = stored[this.#pk.serializeToHexStr()];
+        const backup = stored[this.pre.serialize(this.pk)];
         if (!backup) {
             // if current node does not have rk and email of `id`, just return empty data
             return JSON.stringify({ data: {} });
         }
-        const { code, time } = JSON.parse(await ctx.private.get(this.#msp, id));
+        const { code, time } = this.codeDB.get(id);
         if (!payload.codes.includes(code) || Date.now() - time > 1000 * 60 * 10) {
             throw new Error('Verification failed');
         }
+        this.codeDB.del(id);
         const { rk } = backup;
         const encrypted: Data = JSON.parse(await this.getData(ctx, id));
         const reEncrypted = this.handleReEncrypt(encrypted, rk);
@@ -145,14 +150,14 @@ export class PreDAuth extends Contract {
 
     getGH() {
         return JSON.stringify({
-            g: this.#g.serializeToHexStr(),
-            h: this.#h.serializeToHexStr(),
+            g: this.pre.serialize(this.g),
+            h: this.pre.serialize(this.h),
         });
     }
 
     getPK() {
         return JSON.stringify({
-            pk: this.#pk.serializeToHexStr()
+            pk: this.pre.serialize(this.pk)
         });
     }
 }
