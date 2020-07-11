@@ -185,8 +185,88 @@ cd fabric/network/
 
 ### Deploy/Upgrade chaincode
 
+* prerequisites
+
+```shell script
+cd ../chaincode/
+yarn install
+cd ../network
+```
+
+* then
+
 ```shell script
 ./network.sh deployCC -n PreDAuth
+```
+
+### Deploy PreDAuth backend
+
+* prerequisites
+
+```shell script
+yarn install
+```
+
+* then
+
+```shell script
+yarn clean # only needed after restart fabric network
+yarn start
+```
+
+URL: `https://api.predauth.com:4000`
+
+`api.predauth.com` is not a registered hostname, so you should add it to your `hosts` file
+
+### Deploy PreDAuth frontend
+
+* prerequisites
+
+prepare `.env` file
+
+```shell script
+yarn install
+```
+
+* then
+```shell script
+yarn start
+```
+
+URL: `https://predauth.com:3000`
+
+`https` is necessary, without which `Web Crypto` will not work
+
+### Deploy App backend
+
+* prerequisites
+
+prepare `.env` file
+
+```shell script
+yarn install
+```
+
+* then
+
+```shell script
+yarn start
+```
+
+### Deploy App frontend
+
+* prerequisites
+
+prepare `.env` file
+
+```shell script
+yarn install
+```
+
+* then
+
+```shell script
+yarn start
 ```
 
 ### Certificates
