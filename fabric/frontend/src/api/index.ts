@@ -1,7 +1,8 @@
 import axios, { AxiosInstance } from 'axios';
-import { random } from '../utils/random';
-import { exportPublicKey, sign } from '../utils/ecdsa';
+
 import { Encrypted } from '../utils/alice';
+import { exportPublicKey, sign } from '../utils/ecdsa';
+import { random } from '../utils/random';
 
 class ENDPOINT {
     static base = 'https://api.predauth.com:4000';

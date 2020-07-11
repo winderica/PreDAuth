@@ -1,7 +1,7 @@
-import React, { FC } from 'react';
-import { useLocation } from '@reach/router';
 import { AppBar as Bar, IconButton, Toolbar, Typography } from '@material-ui/core';
 import { Menu } from '@material-ui/icons';
+import { useLocation } from '@reach/router';
+import React, { FC } from 'react';
 
 import { useStyles } from '../styles/appBar';
 

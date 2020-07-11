@@ -1,13 +1,13 @@
-import React, { FC } from 'react';
-import { observer } from 'mobx-react';
-import { RouteComponentProps } from '@reach/router';
 import { Button, Typography } from '@material-ui/core';
+import { RouteComponentProps } from '@reach/router';
+import { observer } from 'mobx-react';
+import React, { FC } from 'react';
 
 import { Anchor } from '../components/Anchor';
 import { Dialog } from '../components/Dialog';
 import { useStores } from '../hooks/useStores';
-import { useStyles } from '../styles/home';
 import logo from '../images/logo.png';
+import { useStyles } from '../styles/home';
 
 export const Home = observer<FC<RouteComponentProps>>(() => {
     const { identityStore } = useStores();

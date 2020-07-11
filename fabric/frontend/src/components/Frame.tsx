@@ -1,13 +1,13 @@
-import React, { FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
 import { Backup, Fingerprint, List, Home } from '@material-ui/icons';
+import { observer } from 'mobx-react';
+import React, { FC, useEffect, useState } from 'react';
+
+import { useStores } from '../hooks/useStores';
+import { useStyles } from '../styles/frame';
 
 import { AppBar } from './AppBar';
 import { Menu } from './Menu';
 import { Notifier } from './Notifier';
-
-import { useStores } from '../hooks/useStores';
-import { useStyles } from '../styles/frame';
 import { Progress } from './Progress';
 
 const listItems = [

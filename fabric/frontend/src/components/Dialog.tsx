@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
 import { Dialog as MuiDialog, DialogActions, DialogContent, DialogTitle } from '@material-ui/core';
+import React, { FC } from 'react';
 
 interface Props {
     open: boolean;

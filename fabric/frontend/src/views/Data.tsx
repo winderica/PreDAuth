@@ -1,18 +1,18 @@
-import React, { FC } from 'react';
-import { toJS } from 'mobx';
-import { observer } from 'mobx-react';
 import { Button } from '@material-ui/core';
 import { Redirect, RouteComponentProps } from '@reach/router';
+import { toJS } from 'mobx';
+import { observer } from 'mobx-react';
+import React, { FC } from 'react';
 
 import { api } from '../api';
 import { Table } from '../components/Table';
-import { useStyles } from '../styles/data';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
-import { apiWrapper } from '../utils/apiWrapper';
-import { encrypt } from '../utils/aliceWrapper';
 import { UserDataStore } from '../stores';
+import { useStyles } from '../styles/data';
+import { encrypt } from '../utils/aliceWrapper';
+import { apiWrapper } from '../utils/apiWrapper';
 
 export const Data = observer<FC<RouteComponentProps>>(() => {
     const classes = useStyles();

@@ -1,5 +1,3 @@
-import React, { FC, forwardRef, ForwardRefRenderFunction } from 'react';
-import { observer } from 'mobx-react';
 import {
     AddBox,
     ArrowDownward,
@@ -19,6 +17,9 @@ import {
     ViewColumn
 } from '@material-ui/icons';
 import MaterialTable from 'material-table';
+import { observer } from 'mobx-react';
+import React, { FC, forwardRef, ForwardRefRenderFunction } from 'react';
+
 import { UserDataStore } from '../stores';
 
 interface Props {

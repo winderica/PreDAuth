@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 
 interface Props {
     time: number;
@@ -19,5 +19,5 @@ export const Timer: FC<Props> = ({ time, onTimeout }) => {
         }, 1000);
     });
 
-    return timeLeft;
+    return <>{timeLeft}</>;
 };

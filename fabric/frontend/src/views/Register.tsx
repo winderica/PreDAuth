@@ -1,15 +1,15 @@
-import React, { ChangeEvent, FC, useState } from 'react';
-import { observer } from 'mobx-react';
 import { Button, TextField, Typography } from '@material-ui/core';
 import { RouteComponentProps } from '@reach/router';
+import { observer } from 'mobx-react';
+import React, { ChangeEvent, FC, useState } from 'react';
 
 import { api } from '../api';
 import { Dialog } from '../components/Dialog';
-import { useStores } from '../hooks/useStores';
-import { generateKey } from '../utils/ecdsa';
-import { apiWrapper } from '../utils/apiWrapper';
-import { encrypt } from '../utils/aliceWrapper';
 import { useAlice } from '../hooks/useAlice';
+import { useStores } from '../hooks/useStores';
+import { encrypt } from '../utils/aliceWrapper';
+import { apiWrapper } from '../utils/apiWrapper';
+import { generateKey } from '../utils/ecdsa';
 
 export const Register = observer<FC<RouteComponentProps>>(({ navigate }) => {
     const { identityStore, componentStateStore, userDataStore, keyStore } = useStores();

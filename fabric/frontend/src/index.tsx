@@ -1,7 +1,9 @@
 import React, { StrictMode } from 'react';
 import { render } from 'react-dom';
-import { App } from './views/App';
+
 import 'mobx-react/batchingForReactDom';
+
+import { App } from './views/App';
 
 render(
     <StrictMode>

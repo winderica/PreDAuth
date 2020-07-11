@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 
+import { api } from '../api';
+import { decrypt } from '../utils/aliceWrapper';
+import { apiWrapper } from '../utils/apiWrapper';
+
 import { useAlice } from './useAlice';
 import { useStores } from './useStores';
-import { api } from '../api';
-import { apiWrapper } from '../utils/apiWrapper';
-import { decrypt } from '../utils/aliceWrapper';
 
 export const useUserData = () => {
     const alice = useAlice();

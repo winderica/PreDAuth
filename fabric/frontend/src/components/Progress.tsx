@@ -1,5 +1,6 @@
-import React, { FC } from 'react';
 import { LinearProgress } from '@material-ui/core';
+import React, { FC } from 'react';
+
 import useStyles from '../styles/progress';
 
 export const Progress: FC = () => {

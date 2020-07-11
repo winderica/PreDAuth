@@ -1,5 +1,6 @@
-import React, { FC } from 'react';
 import { Link } from '@reach/router';
+import React, { FC } from 'react';
+
 import { useStyles } from '../styles/anchor';
 
 interface Props {

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { SnackbarKey, useSnackbar } from 'notistack';
 import { autorun } from 'mobx';
+import { SnackbarKey, useSnackbar } from 'notistack';
+import { useEffect, useState } from 'react';
+
 import { useStores } from '../hooks/useStores';
 
 export const Notifier = () => {

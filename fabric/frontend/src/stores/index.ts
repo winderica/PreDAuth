@@ -1,8 +1,8 @@
-import { UserDataStore } from './userData';
+import { ComponentStateStore } from './componentState';
 import { IdentityStore } from './identity';
 import { KeyStore } from './key';
 import { NotificationStore } from './notification';
-import { ComponentStateStore } from './componentState';
+import { UserDataStore } from './userData';
 
 export const stores = {
     userDataStore: new UserDataStore(),

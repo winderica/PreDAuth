@@ -1,17 +1,17 @@
-import React, { ChangeEvent, FC, useEffect, useState } from 'react';
-import { observer } from 'mobx-react';
 import { Button, Card, CardActions, CardContent, CardHeader, Chip, Divider, IconButton, TextField, Tooltip, Typography } from '@material-ui/core';
+import { DeleteForever } from '@material-ui/icons';
 import { Redirect, RouteComponentProps } from '@reach/router';
+import { observer } from 'mobx-react';
+import React, { ChangeEvent, FC, useEffect, useState } from 'react';
+import { BeforeCapture, DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 
+import { api } from '../api';
+import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
-import { useAlice } from '../hooks/useAlice';
-import { api } from '../api';
-import { BeforeCapture, DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 import { useStyles } from '../styles/backup';
-import { classNames } from '../utils/classnames';
-import { DeleteForever } from '@material-ui/icons';
 import { apiWrapper } from '../utils/apiWrapper';
+import { classNames } from '../utils/classnames';
 
 const TagsGroup: FC<{ tags: string[] }> = ({ tags }) => {
     const classes = useStyles();

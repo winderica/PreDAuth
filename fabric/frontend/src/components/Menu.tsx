@@ -1,7 +1,6 @@
-import React, { FC } from 'react';
-
 import { Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import { ChevronLeft } from '@material-ui/icons';
+import React, { FC } from 'react';
 
 import { useStyles } from '../styles/menu';
 
