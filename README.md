@@ -210,7 +210,7 @@ yarn install
 * then
 
 ```shell script
-yarn clean # only needed after restart fabric network
+yarn cleanup # only needed after restart fabric network
 yarn start
 ```
 
