@@ -59,7 +59,7 @@ const TagsCard: FC<{ pk: string; index: number; }> = ({ children, pk, index }) =
                 classes={{ content: classes.cardHeader }}
                 title={`节点${index + 1}`}
                 subheader={
-                    <Tooltip title={pk}>
+                    <Tooltip title={pk} interactive>
                         <Typography
                             variant='body2'
                             color='textSecondary'
