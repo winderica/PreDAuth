@@ -1,4 +1,4 @@
-import { Backup, Fingerprint, List, Home } from '@material-ui/icons';
+import { Backup, BugReport, Fingerprint, List, Home } from '@material-ui/icons';
 import { observer } from 'mobx-react';
 import React, { FC, useEffect, useState } from 'react';
 
@@ -15,6 +15,7 @@ const listItems = [
     { to: '/data', text: 'data', icon: <List /> },
     { to: '/auth', text: 'auth', icon: <Fingerprint /> },
     { to: '/backup', text: 'backup', icon: <Backup /> },
+    { to: '/debug', text: 'debug', icon: <BugReport /> },
 ];
 
 export const Frame = observer<FC>(({ children }) => {
