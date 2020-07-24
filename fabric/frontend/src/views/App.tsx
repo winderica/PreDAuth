@@ -10,6 +10,7 @@ import { theme, useStyles } from '../styles/global';
 import { Auth } from './Auth';
 import { Backup } from './Backup';
 import { Data } from './Data';
+import { Debug } from './Debug';
 import { Home } from './Home';
 import { Recover } from './Recover';
 import { Register } from './Register';
@@ -30,6 +31,7 @@ export const App: FC = () => {
                                     <Backup path='/backup' />
                                     <Register path='/register' />
                                     <Recover path='/recover' />
+                                    <Debug path='/debug' />
                                 </Router>
                             </AliceProvider>
                         </Frame>
