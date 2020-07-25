@@ -11,7 +11,7 @@ import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
 import { useStyles } from '../styles/data';
-import { encrypt } from '../utils/aliceWrapper';
+import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
 export const Data = observer<FC<RouteComponentProps>>(() => {

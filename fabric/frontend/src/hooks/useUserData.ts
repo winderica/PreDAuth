@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 import { api } from '../api';
-import { decrypt } from '../utils/aliceWrapper';
+import { decrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
 import { useAlice } from './useAlice';

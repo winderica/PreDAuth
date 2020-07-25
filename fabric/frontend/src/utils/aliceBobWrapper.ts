@@ -1,4 +1,7 @@
-import { Alice, Encrypted, PreKeyPair } from './alice';
+import { Encrypted, PreKeyPair, ReEncrypted } from '../constants/types';
+
+import { Alice } from './alice';
+import { Bob } from './bob';
 
 export const encrypt = async (aliceInstance: Alice, data: [string, Record<string, string>][]) => {
     const encrypted: Record<string, Encrypted> = {};
@@ -15,6 +18,16 @@ export const decrypt = async (aliceInstance: Alice, data: Record<string, Encrypt
     const decrypted: { key: string; value: string; tag: string; }[] = [];
     await Promise.all(Object.entries(data).map(async ([tag, encrypted]) => {
         Object.entries<string>(JSON.parse(await aliceInstance.decrypt(encrypted, dataKey[tag].sk))).forEach(([key, value]) => {
+            decrypted.push({ key, value, tag });
+        });
+    }));
+    return decrypted;
+};
+
+export const reDecrypt = async (bobInstance: Bob, data: Record<string, ReEncrypted>) => {
+    const decrypted: { key: string; value: string; tag: string; }[] = [];
+    await Promise.all(Object.entries(data).map(async ([tag, encrypted]) => {
+        Object.entries<string>(JSON.parse(await bobInstance.reDecrypt(encrypted))).forEach(([key, value]) => {
             decrypted.push({ key, value, tag });
         });
     }));

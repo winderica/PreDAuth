@@ -11,7 +11,7 @@ import { useStores } from '../hooks/useStores';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
-import { encrypt } from '../utils/aliceWrapper';
+import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
 interface AuthGettingRequest {

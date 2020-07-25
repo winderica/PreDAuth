@@ -7,7 +7,7 @@ import { api } from '../api';
 import { Dialog } from '../components/Dialog';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
-import { encrypt } from '../utils/aliceWrapper';
+import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 import { generateKey } from '../utils/ecdsa';
 
