@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { Encrypted } from '../utils/alice';
+import { Encrypted } from '../constants/types';
 import { exportPublicKey, sign } from '../utils/ecdsa';
 import { random } from '../utils/random';
 

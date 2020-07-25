@@ -1,18 +1,7 @@
+import { Encrypted, PreKeyPair } from '../constants/types';
+
+import { AES } from './aes';
 import { G1, G2, PRE } from './pre';
-
-export interface PreKeyPair {
-    pk: string;
-    sk: string;
-}
-
-export interface Encrypted {
-    data: string;
-    key: {
-        ca0: string;
-        ca1: string;
-    };
-    iv: string;
-}
 
 export class Alice {
     readonly #g: G1;

@@ -1,7 +1,7 @@
 import * as idb from 'idb-keyval';
 import { action, observable } from 'mobx';
 
-import { PreKeyPair } from '../utils/alice';
+import { PreKeyPair } from '../constants/types';
 
 export class KeyStore {
     @observable
