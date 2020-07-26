@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-import { Encrypted } from '../constants/types';
+import { Generators, TaggedEncrypted, TaggedReKey } from '../constants/types';
 import { exportPublicKey, sign } from '../utils/ecdsa';
 import { random } from '../utils/random';
 
@@ -40,7 +40,7 @@ class API {
     }
 
     async getGenerators() {
-        const { data } = await this.#axios.get<R<{ g: string; h: string; }>>(ENDPOINT.getGenerators);
+        const { data } = await this.#axios.get<R<Generators>>(ENDPOINT.getGenerators);
         if (!data.ok) {
             throw new Error(data.payload.message);
         }
@@ -48,14 +48,14 @@ class API {
     }
 
     async getData(id: string) {
-        const { data } = await this.#axios.get<R<Record<string, Encrypted>>>(ENDPOINT.data(id));
+        const { data } = await this.#axios.get<R<TaggedEncrypted>>(ENDPOINT.data(id));
         if (!data.ok) {
             throw new Error(data.payload.message);
         }
         return data.payload;
     }
 
-    async setData(id: string, key: CryptoKeyPair, payload: Record<string, Encrypted>) {
+    async setData(id: string, key: CryptoKeyPair, payload: TaggedEncrypted) {
         const nonce = random(32);
         const signature = await sign(nonce, key);
         const { data } = await this.#axios.post<R<undefined>>(ENDPOINT.data(id), {
@@ -68,7 +68,7 @@ class API {
         }
     }
 
-    async reEncrypt(id: string, key: CryptoKeyPair, callback: string, payload: Record<string, string>) {
+    async reEncrypt(id: string, key: CryptoKeyPair, callback: string, payload: TaggedReKey) {
         const nonce = random(32);
         const signature = await sign(nonce, key);
         const { data } = await this.#axios.post<R<undefined>>(ENDPOINT.reEncrypt(id, callback), {
@@ -89,7 +89,7 @@ class API {
         return data.payload;
     }
 
-    async backup(id: string, key: CryptoKeyPair, payload: Record<string, { rk: Record<string, string>; email: string; }>) {
+    async backup(id: string, key: CryptoKeyPair, payload: Record<string, { rk: TaggedReKey; email: string; }>) {
         const nonce = random(32);
         const signature = await sign(nonce, key);
         const { data } = await this.#axios.post<R<undefined>>(ENDPOINT.backup(id), {

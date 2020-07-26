@@ -1,19 +1,21 @@
 import { action, computed, observable } from 'mobx';
 
+import { TaggedUserData, UserData } from '../constants/types';
+
 export class UserDataStore {
     @observable
-    data: Record<string, { value: string; tag: string; }>;
+    data: UserData;
 
     @observable
     initialized: boolean;
 
-    constructor(data: Record<string, { value: string; tag: string; }> = {}) {
+    constructor(data: UserData = {}) {
         this.data = data;
         this.initialized = false;
     }
 
     @action
-    setAll(data: Record<string, { value: string; tag: string; }>) {
+    setAll(data: UserData) {
         this.data = data;
     }
 
@@ -39,7 +41,7 @@ export class UserDataStore {
 
     @computed
     get dataGroupedByTag() {
-        const res: Record<string, Record<string, string>> = {};
+        const res: TaggedUserData = {};
         Object.entries(this.data).forEach(([key, { value, tag }]) => res[tag] ? res[tag][key] = value : res[tag] = { [key]: value });
         return res;
     }

@@ -1,7 +1,22 @@
+export interface Generators {
+    g: string;
+    h: string;
+}
+
+export type UserData = Record<string, { value: string; tag: string; }>;
+
+export type UserDataArray = { key: string; value: string; tag: string; }[];
+
+export type TaggedUserData = Record<string, Record<string, string>>;
+
+export type TaggedUserDataArray = [string, Record<string, string>][];
+
 export interface PreKeyPair {
     pk: string;
     sk: string;
 }
+
+export type TaggedPreKeyPair = Record<string, PreKeyPair>;
 
 export interface Encrypted {
     data: string;
@@ -12,6 +27,8 @@ export interface Encrypted {
     iv: string;
 }
 
+export type TaggedEncrypted = Record<string, Encrypted>;
+
 export interface ReEncrypted {
     data: string;
     key: {
@@ -20,3 +37,9 @@ export interface ReEncrypted {
     };
     iv: string;
 }
+
+export type TaggedReEncrypted = Record<string, ReEncrypted>;
+
+export type TaggedReKey = Record<string, string>;
+
+export type Checked = Record<string, boolean | undefined>;

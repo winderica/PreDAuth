@@ -7,7 +7,7 @@ import React, { ChangeEvent, FC, useState } from 'react';
 import { Highlighter } from '../components/Highlighter';
 import { IToO } from '../components/IToO';
 import { Stepper } from '../components/Stepper';
-import { Encrypted, PreKeyPair, ReEncrypted } from '../constants/types';
+import { Checked, TaggedEncrypted, TaggedPreKeyPair, TaggedReEncrypted, TaggedReKey, UserDataArray } from '../constants/types';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
@@ -21,12 +21,12 @@ export const Debug = observer<FC<RouteComponentProps>>(() => {
     const alice = useAlice();
     useUserData();
     const [bob] = useState(new Bob(alice.pre, alice.g, alice.h));
-    const [encrypted, setEncrypted] = useState<Record<string, Encrypted>>({});
-    const [dataKey, setDataKey] = useState<Record<string, PreKeyPair>>({});
-    const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
-    const [rk, setRk] = useState<Record<string, string>>({});
-    const [reEncrypted, setReEncrypted] = useState<Record<string, ReEncrypted>>({});
-    const [reDecrypted, setReDecrypted] = useState<{ key: string; value: string; tag: string; }[]>([]);
+    const [encrypted, setEncrypted] = useState<TaggedEncrypted>({});
+    const [dataKey, setDataKey] = useState<TaggedPreKeyPair>({});
+    const [checked, setChecked] = useState<Checked>({});
+    const [rk, setRk] = useState<TaggedReKey>({});
+    const [reEncrypted, setReEncrypted] = useState<TaggedReEncrypted>({});
+    const [reDecrypted, setReDecrypted] = useState<UserDataArray>([]);
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }

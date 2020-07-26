@@ -6,6 +6,7 @@ import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 import { api } from '../api';
 import { Table } from '../components/Table';
 import { Timer } from '../components/Timer';
+import { Checked } from '../constants/types';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUrlParams } from '../hooks/useUrlParams';
@@ -38,7 +39,7 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
     const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
-    const [checked, setChecked] = useState<Record<string, boolean | undefined>>({});
+    const [checked, setChecked] = useState<Checked>({});
     const handleAuth = async () => {
         const data = Object.fromEntries(
             Object.entries(userDataStore.dataGroupedByTag)

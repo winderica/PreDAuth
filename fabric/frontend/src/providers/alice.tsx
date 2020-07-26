@@ -3,6 +3,7 @@ import { observer } from 'mobx-react';
 import React, { FC, useEffect, useState } from 'react';
 
 import { api } from '../api';
+import { Generators } from '../constants/types';
 import { AliceContext } from '../contexts';
 import { useStores } from '../hooks/useStores';
 import { Alice } from '../utils/alice';
@@ -15,7 +16,7 @@ export const AliceProvider = observer<FC>(({ children }) => {
         void (async () => {
             const pre = new PRE();
             await pre.init();
-            const gh = await idb.get<{ g: string; h: string; }>('gh');
+            const gh = await idb.get<Generators>('gh');
             if (!gh) {
                 try {
                     notificationStore.enqueueInfo('正在获取生成元');

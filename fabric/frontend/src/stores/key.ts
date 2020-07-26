@@ -1,19 +1,19 @@
 import * as idb from 'idb-keyval';
 import { action, observable } from 'mobx';
 
-import { PreKeyPair } from '../constants/types';
+import { TaggedPreKeyPair } from '../constants/types';
 
 export class KeyStore {
     @observable
-    dataKey: Record<string, PreKeyPair> = {};
+    dataKey: TaggedPreKeyPair = {};
 
     @action
     async load() {
-        this.dataKey = await idb.get('dataKey') || this.dataKey;
+        this.dataKey = await idb.get<TaggedPreKeyPair>('dataKey') || this.dataKey;
     }
 
     @action
-    async set(key: Record<string, PreKeyPair>) {
+    async set(key: TaggedPreKeyPair) {
         this.dataKey = key;
         await idb.set('dataKey', key);
     }
