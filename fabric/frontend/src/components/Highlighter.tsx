@@ -3,7 +3,11 @@ import React, { FC, useEffect, useRef } from 'react';
 
 import { useStyles } from '../styles/highlighter';
 
-export const Highlighter: FC<{ language: string }> = ({ language, children }) => {
+interface Props {
+    language: string;
+}
+
+export const Highlighter: FC<Props> = ({ language, children }) => {
     const codeNode = useRef<HTMLElement>(null);
     const classes = useStyles();
     useEffect(() => {
