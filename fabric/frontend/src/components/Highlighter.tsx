@@ -1,9 +1,9 @@
 import { highlightBlock } from 'highlight.js';
 import React, { FC, useEffect, useRef } from 'react';
 
-import { useStyles } from '../styles/highlight';
+import { useStyles } from '../styles/highlighter';
 
-export const Highlight: FC<{ language: string }> = ({ language, children }) => {
+export const Highlighter: FC<{ language: string }> = ({ language, children }) => {
     const codeNode = useRef<HTMLElement>(null);
     const classes = useStyles();
     useEffect(() => {
