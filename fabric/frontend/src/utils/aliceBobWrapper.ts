@@ -25,11 +25,11 @@ export const decrypt = async (aliceInstance: Alice, data: TaggedEncrypted, dataK
 };
 
 export const reDecrypt = async (bobInstance: Bob, data: TaggedReEncrypted) => {
-    const decrypted: UserDataArray = [];
-    await Promise.all(Object.entries(data).map(async ([tag, encrypted]) => {
-        Object.entries<string>(JSON.parse(await bobInstance.reDecrypt(encrypted))).forEach(([key, value]) => {
-            decrypted.push({ key, value, tag });
-        });
-    }));
-    return decrypted;
+    return Object.fromEntries(
+        await Promise.all(
+            Object.entries(data).map(async ([tag, encrypted]) =>
+                [tag, JSON.parse(await bobInstance.reDecrypt(encrypted))] as TaggedUserDataArray[0]
+            )
+        )
+    );
 };

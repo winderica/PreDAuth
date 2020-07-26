@@ -7,7 +7,7 @@ import React, { ChangeEvent, FC, useState } from 'react';
 import { Highlighter } from '../components/Highlighter';
 import { IToO } from '../components/IToO';
 import { Stepper } from '../components/Stepper';
-import { Checked, TaggedEncrypted, TaggedPreKeyPair, TaggedReEncrypted, TaggedReKey, UserDataArray } from '../constants/types';
+import { Checked, TaggedEncrypted, TaggedPreKeyPair, TaggedReEncrypted, TaggedReKey, TaggedUserData } from '../constants/types';
 import { useAlice } from '../hooks/useAlice';
 import { useStores } from '../hooks/useStores';
 import { useUserData } from '../hooks/useUserData';
@@ -26,7 +26,7 @@ export const Debug = observer<FC<RouteComponentProps>>(() => {
     const [checked, setChecked] = useState<Checked>({});
     const [rk, setRk] = useState<TaggedReKey>({});
     const [reEncrypted, setReEncrypted] = useState<TaggedReEncrypted>({});
-    const [reDecrypted, setReDecrypted] = useState<UserDataArray>([]);
+    const [reDecrypted, setReDecrypted] = useState<TaggedUserData>({});
     if (!identityStore.id) {
         return <Redirect to='/' noThrow />;
     }
