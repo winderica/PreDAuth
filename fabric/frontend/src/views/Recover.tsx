@@ -70,20 +70,22 @@ export const Recover = observer<FC<RouteComponentProps>>(({ navigate }) => {
             <Button variant='contained' color='primary' onClick={handleCodeRequest} className={classes.button}>接收验证码</Button>
         </Card>
         <Card className={classes.card}>
-            {codes.map((i, j) => <div key={j}>
-                <TextField
-                    margin='dense'
-                    label='验证码'
-                    value={i}
-                    onChange={handleInputCode(j)}
-                />
-                <IconButton onClick={handleRemoveField(j)} disabled={codes.length <= 1}>
-                    <RemoveCircleOutline />
-                </IconButton>
-                {j === codes.length - 1 && <IconButton onClick={handleAddField}>
-                    <AddCircleOutline />
-                </IconButton>}
-            </div>)}
+            {codes.map((i, j) => (
+                <div key={j}>
+                    <TextField
+                        margin='dense'
+                        label='验证码'
+                        value={i}
+                        onChange={handleInputCode(j)}
+                    />
+                    <IconButton onClick={handleRemoveField(j)} disabled={codes.length <= 1}>
+                        <RemoveCircleOutline />
+                    </IconButton>
+                    {j === codes.length - 1 && <IconButton onClick={handleAddField}>
+                        <AddCircleOutline />
+                    </IconButton>}
+                </div>
+            ))}
             <Button variant='contained' color='primary' onClick={handleRecover} className={classes.button}>恢复数据</Button>
         </Card>
     </>;
