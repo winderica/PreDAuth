@@ -32,7 +32,7 @@ export const Menu: FC<Props> = ({ open, toggleOpen, items }) => {
             </div>
             <Divider />
             <List>
-                {items.map(({ to, text, icon }, index) =>
+                {items.map(({ to, text, icon }, index) => (
                     <Anchor to={to} key={index}>
                         <ListItem button onClick={open ? toggleOpen : undefined}>
                             <ListItemIcon className={classes.icon}>
@@ -40,8 +40,8 @@ export const Menu: FC<Props> = ({ open, toggleOpen, items }) => {
                             </ListItemIcon>
                             <ListItemText primary={text} />
                         </ListItem>
-                    </Anchor>,
-                )}
+                    </Anchor>
+                ))}
             </List>
         </Drawer>
     );
