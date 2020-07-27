@@ -1,12 +1,12 @@
 import { IconButton, Slide } from '@material-ui/core';
 import { ArrowBack, ArrowForward } from '@material-ui/icons';
-import React, { FC, useState } from 'react';
+import React, { FC, useState, ReactNode } from 'react';
 
 import { useStyles } from '../styles/iToO';
 
 interface Props {
-    left: JSX.Element;
-    right: JSX.Element;
+    left: ReactNode | ReactNode[];
+    right: ReactNode | ReactNode[];
     onClick: () => void;
 }
 
