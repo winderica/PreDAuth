@@ -1,9 +1,10 @@
-import { Button, Card, CardActions, CardContent, CardHeader, Checkbox, FormControlLabel, Typography } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, CardHeader, Typography } from '@material-ui/core';
 import { Redirect, RouteComponentProps } from '@reach/router';
 import { observer } from 'mobx-react';
 import React, { ChangeEvent, FC, useEffect, useState } from 'react';
 
 import { api } from '../api';
+import { Checkbox } from '../components/Checkbox';
 import { Table } from '../components/Table';
 import { Timer } from '../components/Timer';
 import { Checked } from '../constants/types';
@@ -65,19 +66,11 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
             <Typography>为应用生成重加密密钥，将您保存在PreDAuth上的数据安全地发送给应用。</Typography>
             <Typography>应用{request.id}想要获取您的如下数据：</Typography>
             {request.data.map((key) => (
-                <FormControlLabel
-                    control={<Checkbox checked={!!checked[key]} disabled={!userDataStore.data[key]} onChange={handleCheck} name={key} />}
-                    label={key}
-                    key={key}
-                />
+                <Checkbox checked={!!checked[key]} onCheck={handleCheck} name={key} disabled={!userDataStore.data[key]} key={key} />
             ))}
             <Typography>数据对应的标签将自动勾选</Typography>
             {Object.entries(userDataStore.dataGroupedByTag).map(([tag, data]) => (
-                <FormControlLabel
-                    control={<Checkbox checked={!!Object.keys(data).filter((key) => checked[key]).length} name={tag} />}
-                    label={tag}
-                    key={tag}
-                />
+                <Checkbox checked={!!Object.keys(data).filter((key) => checked[key]).length} name={tag} key={tag} />
             ))}
         </CardContent>
         <CardActions>
