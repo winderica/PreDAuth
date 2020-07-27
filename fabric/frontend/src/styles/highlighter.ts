@@ -1,13 +1,13 @@
 import { makeStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles(({ typography }) => ({
+export const useStyles = makeStyles(({ typography, palette, spacing }) => ({
     '@global': {
         '.hljs': {
             display: 'block',
             overflowX: 'auto',
-            padding: '0.5em',
+            padding: spacing(1),
             color: '#383a42',
-            background: '#fafafa'
+            background: palette.background.default
         },
         '.hljs-comment, .hljs-quote': {
             color: '#a0a1a7',
@@ -44,5 +44,9 @@ export const useStyles = makeStyles(({ typography }) => ({
             textDecoration: 'underline'
         }
     },
-    pre: typography.body1
+    pre: {
+        ...typography.body1,
+        fontSize: '1.2rem',
+        margin: 0
+    }
 }));
