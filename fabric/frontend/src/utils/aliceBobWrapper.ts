@@ -3,15 +3,16 @@ import { TaggedEncrypted, TaggedPreKeyPair, TaggedReEncrypted, TaggedUserDataArr
 import { Alice } from './alice';
 import { Bob } from './bob';
 
-export const encrypt = async (aliceInstance: Alice, data: TaggedUserDataArray) => {
+export const encrypt = async (aliceInstance: Alice, data: TaggedUserDataArray, dataKey = getDataKey(aliceInstance, data.map(([tag]) => tag))) => {
     const encrypted: TaggedEncrypted = {};
-    const dataKey: TaggedPreKeyPair = {};
     await Promise.all(data.map(async ([tag, kv]) => {
-        const { pk, sk } = aliceInstance.key();
-        dataKey[tag] = { pk, sk };
-        encrypted[tag] = await aliceInstance.encrypt(JSON.stringify(kv), pk);
+        encrypted[tag] = await aliceInstance.encrypt(JSON.stringify(kv), dataKey[tag].pk);
     }));
     return { encrypted, dataKey };
+};
+
+export const getDataKey = (aliceInstance: Alice, tags: string[]) => {
+    return Object.fromEntries(tags.map((tag) => [tag, aliceInstance.key()]));
 };
 
 export const decrypt = async (aliceInstance: Alice, data: TaggedEncrypted, dataKey: TaggedPreKeyPair) => {
