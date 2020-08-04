@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Divider, Typography, Tooltip } from '@material-ui/core';
+import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Divider, Tooltip, Typography } from '@material-ui/core';
 import { useStyles } from '../styles/dashboard';
 import { RouteComponentProps } from '@reach/router';
 import { useAppInfo } from '../providers/appInfo';
@@ -57,11 +57,11 @@ export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
                         <Typography variant='body2' color='textSecondary'>{data.bio}</Typography>
                     </div>
                 </CardContent>
-                <CardActions>
-                    <Button variant='outlined' color='primary'>完成</Button>
+                <CardActions className={classes.buttonContainer}>
                     <Tooltip title='为您在PreDAuth中设置YouChat ID，以供其它应用获取'>
-                        <Button onClick={handleClick} variant='contained' color='primary'>连携</Button>
+                        <Button onClick={handleClick} variant='outlined' color='primary'>连携</Button>
                     </Tooltip>
+                    <Button variant='contained' color='primary'>完成</Button>
                 </CardActions>
             </Card>
         </div>

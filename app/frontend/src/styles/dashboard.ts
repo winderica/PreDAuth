@@ -19,5 +19,11 @@ export const useStyles = makeStyles(({ spacing }) => ({
     profile: {
         marginLeft: spacing(2),
         minWidth: spacing(40)
+    },
+    buttonContainer: {
+        padding: spacing(2),
+        '& :first-child': {
+            marginLeft: 'auto'
+        }
     }
 }));
