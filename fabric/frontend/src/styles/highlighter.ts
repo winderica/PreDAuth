@@ -46,7 +46,6 @@ export const useStyles = makeStyles(({ typography, palette, spacing }) => ({
     },
     pre: {
         ...typography.body1,
-        fontSize: '1.2rem',
         margin: 0
     }
 }));
