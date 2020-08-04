@@ -27,8 +27,7 @@ app.use(urlencoded({ extended: true }));
 app.use(session({
     secret: 'F4k3P@ssw0rd',
     cookie: {
-        sameSite: 'none',
-        secure: true
+        sameSite: 'none'
     }
 }));
 
