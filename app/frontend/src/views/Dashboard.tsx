@@ -1,21 +1,24 @@
 import React, { FC, useEffect, useState } from 'react';
-import { Avatar, Card, CardContent, CardHeader, Divider, Typography } from '@material-ui/core';
+import { Avatar, Button, Card, CardActions, CardContent, CardHeader, Divider, Typography, Tooltip } from '@material-ui/core';
 import { useStyles } from '../styles/dashboard';
 import { RouteComponentProps } from '@reach/router';
+import { useAppInfo } from '../providers/appInfo';
 
 interface Data {
     name: string;
     avatar: string;
     bio: string;
     city: string;
+    id: string;
 }
 
 const isValid = (data: Data | null) => {
-    return Boolean(data && data.name && data.avatar && data.bio && data.city);
+    return Boolean(data && data.name && data.avatar && data.bio && data.city && data.id);
 };
 
 export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
     const [data, setData] = useState<Data | null>(null);
+    const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
             const { data } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/data`, { credentials: 'include' })).json();
@@ -28,6 +31,18 @@ export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
             }
         })();
     }, [navigate]);
+    const handleClick = () => {
+        window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
+            type: 'set',
+            id: 'YouChat',
+            pk: appInfo.pk,
+            callback: appInfo.callback,
+            redirect: `${process.env.REACT_APP_APP_FRONTEND}/dashboard`,
+            data: {
+                YouChatID: data?.id
+            },
+        }))}`;
+    };
     const classes = useStyles();
     return data && isValid(data) ? (
         <div className={classes.root}>
@@ -42,6 +57,12 @@ export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
                         <Typography variant='body2' color='textSecondary'>{data.bio}</Typography>
                     </div>
                 </CardContent>
+                <CardActions>
+                    <Button variant='outlined' color='primary'>完成</Button>
+                    <Tooltip title='为您在PreDAuth中设置YouChat ID，以供其它应用获取'>
+                        <Button onClick={handleClick} variant='contained' color='primary'>连携</Button>
+                    </Tooltip>
+                </CardActions>
             </Card>
         </div>
     ) : null;
