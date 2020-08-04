@@ -3,6 +3,7 @@ import session from 'express-session';
 import fetch from 'node-fetch';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import uuid from 'uuid';
 
 import { PRE } from './utils/pre';
 import { Bob } from './utils/bob';
@@ -68,7 +69,7 @@ void (async () => {
             const data: Record<string, { data: string; key: { cb0: string; cb1: string }; iv: string }> = req.body;
             fakeDB[token] = Object.values(data)
                 .map(({ data, key, iv }) => JSON.parse(bob.reDecrypt(data, key, iv)) as Record<string, string>)
-                .reduce((i, j) => ({ ...i, ...j }), {});
+                .reduce((i, j) => ({ ...i, ...j }), { id: uuid.v4() });
             res.sendStatus(200);
         });
 
