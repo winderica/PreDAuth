@@ -11,9 +11,10 @@ import { randomString } from './utils/random';
 
 dotenv.config();
 const PREDAUTH_BACKEND = process.env.PREDAUTH_BACKEND;
+const APP_BACKEND = process.env.APP_BACKEND;
 
-if (!PREDAUTH_BACKEND) {
-    throw new Error('PREDAUTH_BACKEND not specified');
+if (!PREDAUTH_BACKEND || !APP_BACKEND) {
+    throw new Error('env not specified');
 }
 
 const app = express();
@@ -47,7 +48,7 @@ void (async () => {
             res.json({
                 pk: bob.pk,
                 data: ['name', 'avatar', 'city', 'bio'],
-                callback: `http://127.0.0.1:4001/decrypt/${req.session.token as string}`
+                callback: `${APP_BACKEND}/decrypt/${req.session.token as string}`
             });
         });
 
