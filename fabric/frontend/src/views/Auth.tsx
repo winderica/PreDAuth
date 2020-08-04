@@ -13,6 +13,7 @@ import { useStores } from '../hooks/useStores';
 import { useUrlParams } from '../hooks/useUrlParams';
 import { useUserData } from '../hooks/useUserData';
 import { UserDataStore } from '../stores';
+import { useStyles } from '../styles/auth';
 import { encrypt } from '../utils/aliceBobWrapper';
 import { apiWrapper } from '../utils/apiWrapper';
 
@@ -40,6 +41,7 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
     const { identityStore, keyStore, userDataStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
+    const classes = useStyles();
     const [checked, setChecked] = useState<Checked>({});
     const handleAuth = async () => {
         const data = Object.fromEntries(
@@ -61,28 +63,32 @@ const AuthGetting = observer<FC<{ request: AuthGettingRequest; }>>(({ request })
         const { name, checked } = event.target;
         setChecked((prevChecked) => ({ ...prevChecked, [name]: checked }));
     };
-    return <>
-        <CardContent>
-            <Typography>为应用生成重加密密钥，将您保存在PreDAuth上的数据安全地发送给应用。</Typography>
-            <Typography>应用{request.id}想要获取您的如下数据：</Typography>
-            {request.data.map((key) => (
-                <Checkbox checked={!!checked[key]} onCheck={handleCheck} name={key} disabled={!userDataStore.data[key]} key={key} />
-            ))}
-            <Typography>数据对应的标签将自动勾选</Typography>
-            {Object.entries(userDataStore.dataGroupedByTag).map(([tag, data]) => (
-                <Checkbox checked={!!Object.keys(data).filter((key) => checked[key]).length} name={tag} key={tag} />
-            ))}
-        </CardContent>
-        <CardActions>
-            <Button onClick={handleAuth} variant='contained' color='primary'>授权</Button>
-        </CardActions>
-    </>;
+    return (
+        <Card className={classes.container}>
+            <CardHeader title='授权获取信息' />
+            <CardContent>
+                <Typography>为应用生成重加密密钥，将您保存在PreDAuth上的数据安全地发送给应用。</Typography>
+                <Typography>应用{request.id}想要获取您的以下信息：</Typography>
+                {request.data.map((key) => (
+                    <Checkbox checked={!!checked[key]} onCheck={handleCheck} name={key} disabled={!userDataStore.data[key]} key={key} />
+                ))}
+                <Typography>数据对应的标签将自动勾选</Typography>
+                {Object.entries(userDataStore.dataGroupedByTag).map(([tag, data]) => (
+                    <Checkbox checked={!!Object.keys(data).filter((key) => checked[key]).length} name={tag} key={tag} />
+                ))}
+            </CardContent>
+            <CardActions className={classes.buttonContainer}>
+                <Button onClick={handleAuth} variant='contained' color='primary'>授权</Button>
+            </CardActions>
+        </Card>
+    );
 });
 
 const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request }) => {
     const { userDataStore, identityStore, keyStore, notificationStore } = useStores();
     useUserData();
     const alice = useAlice();
+    const classes = useStyles();
     const deltaDataStore = new UserDataStore(Object.fromEntries(Object.entries(request.data).map(([k, v]) => [k, { value: v, tag: '' }])));
     const handleAuth = async () => {
         deltaDataStore.dataArray.forEach(({ key, value, tag }) => userDataStore.set(key, value, tag));
@@ -96,15 +102,18 @@ const AuthSetting = observer<FC<{ request: AuthSettingRequest; }>>(({ request })
         }, '正在提交加密数据', '成功加密并提交');
     };
 
-    return <>
-        <CardContent>
-            <Typography>应用{request.id}想要更新您的以下数据：</Typography>
-            <Table title='更新信息' dataStore={deltaDataStore} />
-        </CardContent>
-        <CardActions>
-            <Button onClick={handleAuth} variant='contained' color='primary'>授权</Button>
-        </CardActions>
-    </>;
+    return (
+        <Card className={classes.container}>
+            <CardHeader title='授权更新信息' />
+            <CardContent>
+                <Typography gutterBottom>应用{request.id}想要更新您的以下信息，请为各项数据分配对应的标签：</Typography>
+                <Table title='更新信息' dataStore={deltaDataStore} />
+            </CardContent>
+            <CardActions className={classes.buttonContainer}>
+                <Button onClick={handleAuth} variant='contained' color='primary'>授权</Button>
+            </CardActions>
+        </Card>
+    );
 });
 
 export const Auth = observer<FC<RouteComponentProps>>(() => {
@@ -123,19 +132,9 @@ export const Auth = observer<FC<RouteComponentProps>>(() => {
 
     switch (request?.type) {
         case 'get':
-            return (
-                <Card>
-                    <CardHeader title='授权获取信息' />
-                    <AuthGetting request={request} />
-                </Card>
-            );
+            return <AuthGetting request={request} />;
         case 'set':
-            return (
-                <Card>
-                    <CardHeader title='授权更新信息' />
-                    <AuthSetting request={request} />
-                </Card>
-            );
+            return <AuthSetting request={request} />;
         default:
             return <></>;
     }
