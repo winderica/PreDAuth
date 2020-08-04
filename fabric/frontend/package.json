@@ -2,7 +2,7 @@
   "name": "fabric-frontend",
   "version": "1.0.0",
   "license": "MIT",
-  "homepage": "./",
+  "homepage": "/",
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
