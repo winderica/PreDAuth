@@ -1,23 +1,16 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
 import { Button, Card, CardContent, Paper, TextField, Typography } from '@material-ui/core';
 import YouChat from '../assets/YouChat.png';
 
 import { useStyles } from '../styles/signup';
 import { RouteComponentProps } from '@reach/router';
-
-interface AppInfo {
-    pk: string;
-    callback: string;
-    data: string;
-}
+import { useAppInfo } from '../providers/appInfo';
 
 export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
     const classes = useStyles();
-    const [appInfo, setAppInfo] = useState<AppInfo | null>(null);
+    const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
-            const appInfo = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/appInfo`, { credentials: 'include' })).json();
-            setAppInfo(appInfo);
             const { loggedIn } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/status`, { credentials: 'include' })).json();
             if (loggedIn) {
                 if (!navigate) {
@@ -31,13 +24,13 @@ export const Signup: FC<RouteComponentProps> = ({ navigate }) => {
         window.location.href = `${process.env.REACT_APP_PREDAUTH_FRONTEND}/auth/?request=${encodeURIComponent(JSON.stringify({
             type: 'get',
             id: 'YouChat',
-            pk: appInfo?.pk,
-            callback: appInfo?.callback,
+            pk: appInfo.pk,
+            callback: appInfo.callback,
             redirect: `${process.env.REACT_APP_APP_FRONTEND}/dashboard`,
-            data: appInfo?.data,
+            data: appInfo.data,
         }))}`;
     };
-    return appInfo && (
+    return (
         <div className={classes.root}>
             <Paper className={classes.container} elevation={10}>
                 <div className={classes.header}>
