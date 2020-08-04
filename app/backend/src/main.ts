@@ -17,9 +17,10 @@ if (!PREDAUTH_BACKEND) {
 }
 
 const app = express();
-app.use(cors(process.env.APP_FRONTEND ? {
-    origin: process.env.APP_FRONTEND
-} : undefined));
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(session({
