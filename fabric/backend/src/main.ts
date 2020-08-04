@@ -1,5 +1,3 @@
-import { readFileSync } from 'fs';
-import { createServer } from 'https';
 import express, { json, urlencoded } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -22,10 +20,7 @@ import { addAdmin } from '@utils/wallet';
     app.use(routes);
     app.use(errorHandler);
 
-    createServer({
-        key: readFileSync('./assets/key.pem'),
-        cert: readFileSync('./assets/cert.pem'),
-    }, app).listen(port, hostname, () => {
+    app.listen(port, hostname, () => {
         console.log(`Listening on ${hostname}:${port}`);
     });
 })('0.0.0.0', 4000);
