@@ -26,6 +26,9 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(session({
     secret: 'F4k3P@ssw0rd',
+    cookie: {
+        sameSite: 'none'
+    }
 }));
 
 const pre = new PRE();
