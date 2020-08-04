@@ -5,7 +5,7 @@ import { exportPublicKey, sign } from '../utils/ecdsa';
 import { random } from '../utils/random';
 
 class ENDPOINT {
-    static base = 'https://api.predauth.com:4000';
+    static base = process.env.REACT_APP_PREDAUTH_BACKEND as string;
     static register = (id: string) => `${ENDPOINT.base}/user/${id}`;
     static data = (id: string) => `${ENDPOINT.base}/user/${id}/data`;
     static backup = (id: string) => `${ENDPOINT.base}/user/${id}/backup`;
