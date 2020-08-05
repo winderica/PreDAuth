@@ -214,16 +214,12 @@ yarn cleanup # only needed after restart fabric network
 yarn start
 ```
 
-URL: `https://api.predauth.com:4000`
-
-`api.predauth.com` is not a registered hostname, so you should add it to your `hosts` file
+URL: `http://127.0.0.1:4000`
 
 ### Deploy PreDAuth frontend
 
 * prerequisites
 
-prepare `.env` file
-
 ```shell script
 yarn install
 ```
@@ -233,16 +229,12 @@ yarn install
 yarn start
 ```
 
-URL: `https://predauth.com:3000`
-
-`https` is necessary, without which `Web Crypto` will not work
+URL: `http://127.0.0.1:3000`
 
 ### Deploy App backend
 
 * prerequisites
 
-prepare `.env` file
-
 ```shell script
 yarn install
 ```
@@ -252,13 +244,13 @@ yarn install
 ```shell script
 yarn start
 ```
+
+URL: `http://127.0.0.1:4001`
 
 ### Deploy App frontend
 
 * prerequisites
 
-prepare `.env` file
-
 ```shell script
 yarn install
 ```
@@ -269,6 +261,4 @@ yarn install
 yarn start
 ```
 
-### Certificates
-
-All the certificates in this project are self-signed certificates just for test/dev purpose, so you should trust them in your system/browser settings.
+URL: `http://127.0.0.1:3001`
