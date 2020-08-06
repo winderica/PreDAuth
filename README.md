@@ -185,6 +185,80 @@ cd fabric/network/
 
 ### Deploy/Upgrade chaincode
 
+* prerequisites
+
+```shell script
+cd ../chaincode/
+yarn install
+cd ../network
+```
+
+* then
+
 ```shell script
 ./network.sh deployCC -n PreDAuth
 ```
+
+### Deploy PreDAuth backend
+
+* prerequisites
+
+```shell script
+yarn install
+```
+
+* then
+
+```shell script
+yarn cleanup # only needed after restart fabric network
+yarn start
+```
+
+URL: `http://127.0.0.1:4000`
+
+### Deploy PreDAuth frontend
+
+* prerequisites
+
+```shell script
+yarn install
+```
+
+* then
+```shell script
+yarn start
+```
+
+URL: `http://127.0.0.1:3000`
+
+### Deploy App backend
+
+* prerequisites
+
+```shell script
+yarn install
+```
+
+* then
+
+```shell script
+yarn start
+```
+
+URL: `http://127.0.0.1:4001`
+
+### Deploy App frontend
+
+* prerequisites
+
+```shell script
+yarn install
+```
+
+* then
+
+```shell script
+yarn start
+```
+
+URL: `http://127.0.0.1:3001`

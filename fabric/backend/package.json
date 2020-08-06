@@ -28,6 +28,7 @@
   "scripts": {
     "build": "tsc",
     "start": "./scripts/start.sh && ts-node -r ./bootstrap.ts src/main.ts",
-    "start:prod": "cd ./dist && NODE_ENV=production node -r ./bootstrap.js src/main.js"
+    "start:prod": "cd ./dist && NODE_ENV=production node -r ./bootstrap.js src/main.js",
+    "cleanup": "./scripts/cleanup.sh"
   }
 }

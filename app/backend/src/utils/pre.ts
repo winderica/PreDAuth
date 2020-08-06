@@ -34,11 +34,11 @@ export class PRE {
         return { sk, pk };
     }
 
-    encrypt(plain: string, pk: G1, z: GT) {
+    encrypt(plain: string, pk: G1, g: G1, h: G2) {
         const r = this.randomInFr(); // r is randomly selected from Fr
 
         const m = this.mcl.deserializeHexStrToFr(plain);
-        // const z = this.z; // Z = e(g, h)
+        const z = this.mcl.pairing(g, h); // Z = e(g, h)
         const ca0 = this.mcl.add(m, this.mcl.hashToFr(this.mcl.pow(z, r).serialize())); // Ca0 = m*Z^r
 
         const ca1 = this.mcl.mul(pk, r); // Ca1 = PKa^r = g^(ra)

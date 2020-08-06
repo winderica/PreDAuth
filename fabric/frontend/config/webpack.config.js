@@ -1,15 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
-const PnpWebpackPlugin = require('pnp-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const WatchMissingNodeModulesPlugin = require('react-dev-utils/WatchMissingNodeModulesPlugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
+const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
+const webpackDevClientEntry = require.resolve('react-dev-utils/webpackHotDevClient');
+const TerserPlugin = require('terser-webpack-plugin');
+
 const paths = require('./paths');
 const modules = require('./modules');
 const getClientEnvironment = require('./env');
-const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 
 const appPackageJson = require(paths.appPackageJson);
 
@@ -36,7 +40,7 @@ module.exports = function (webpackEnv) {
             ? shouldUseSourceMap ? 'source-map' : false
             : isEnvDevelopment && 'cheap-module-source-map',
         entry: [
-            isEnvDevelopment && require.resolve('react-dev-utils/webpackHotDevClient'),
+            isEnvDevelopment && webpackDevClientEntry,
             paths.appIndexJs,
         ].filter(Boolean),
         output: {
@@ -59,7 +63,32 @@ module.exports = function (webpackEnv) {
         },
         optimization: {
             minimize: isEnvProduction,
-            minimizer: [],
+            minimizer: [
+                new TerserPlugin({
+                    terserOptions: {
+                        parse: {
+                            ecma: 8,
+                        },
+                        compress: {
+                            ecma: 5,
+                            warnings: false,
+                            comparisons: false,
+                            inline: 2,
+                        },
+                        mangle: {
+                            safari10: true,
+                        },
+                        keep_classnames: isEnvProductionProfile,
+                        keep_fnames: isEnvProductionProfile,
+                        output: {
+                            ecma: 5,
+                            comments: false,
+                            ascii_only: true,
+                        },
+                    },
+                    sourceMap: shouldUseSourceMap,
+                }),
+            ],
             splitChunks: {
                 chunks: 'all',
                 name: false,
@@ -72,9 +101,7 @@ module.exports = function (webpackEnv) {
             modules: ['node_modules', paths.appNodeModules].concat(
                 modules.additionalModulePaths || []
             ),
-            extensions: paths.moduleFileExtensions
-                .map(ext => `.${ext}`)
-                .filter(ext => !ext.includes('ts')),
+            extensions: paths.moduleFileExtensions.map(ext => `.${ext}`),
             alias: {
                 ...(isEnvProductionProfile && {
                     'react-dom$': 'react-dom/profiling',
@@ -83,13 +110,7 @@ module.exports = function (webpackEnv) {
                 ...(modules.webpackAliases || {}),
             },
             plugins: [
-                PnpWebpackPlugin,
                 new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
-            ],
-        },
-        resolveLoader: {
-            plugins: [
-                PnpWebpackPlugin.moduleLoader(module),
             ],
         },
         module: {
@@ -111,10 +132,6 @@ module.exports = function (webpackEnv) {
                             },
                         },
                         {
-                            test: /mcl.*\.js$/,
-                            loader: require.resolve('exports-loader')
-                        },
-                        {
                             test: /\.wasm$/,
                             type: 'javascript/auto',
                             loader: require.resolve('file-loader'),
@@ -128,6 +145,20 @@ module.exports = function (webpackEnv) {
                             loader: require.resolve('babel-loader'),
                             options: {
                                 customize: require.resolve('babel-preset-react-app/webpack-overrides'),
+                                babelrc: false,
+                                configFile: false,
+                                presets: [require.resolve('babel-preset-react-app')],
+                                cacheIdentifier: getCacheIdentifier(
+                                    isEnvProduction ? 'production' : isEnvDevelopment && 'development',
+                                    [
+                                        'babel-preset-react-app',
+                                        'react-dev-utils',
+                                        'react-scripts',
+                                    ]
+                                ),
+                                plugins: [
+                                    isEnvDevelopment && require.resolve('react-refresh/babel'),
+                                ].filter(Boolean),
                                 cacheDirectory: true,
                                 cacheCompression: false,
                                 compact: isEnvProduction,
@@ -149,6 +180,17 @@ module.exports = function (webpackEnv) {
                                 ],
                                 cacheDirectory: true,
                                 cacheCompression: false,
+                                cacheIdentifier: getCacheIdentifier(
+                                    isEnvProduction
+                                        ? 'production'
+                                        : isEnvDevelopment && 'development',
+                                    [
+                                        'babel-plugin-named-asset-import',
+                                        'babel-preset-react-app',
+                                        'react-dev-utils',
+                                        'react-scripts',
+                                    ]
+                                ),
                                 sourceMaps: shouldUseSourceMap,
                                 inputSourceMap: shouldUseSourceMap,
                             },
@@ -192,6 +234,11 @@ module.exports = function (webpackEnv) {
             new ModuleNotFoundPlugin(paths.appPath),
             new webpack.DefinePlugin(env.stringified),
             isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
+            isEnvDevelopment && new ReactRefreshWebpackPlugin({
+                overlay: {
+                    entry: webpackDevClientEntry,
+                },
+            }),
             isEnvDevelopment && new WatchMissingNodeModulesPlugin(paths.appNodeModules),
             new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
         ].filter(Boolean),
@@ -204,7 +251,10 @@ module.exports = function (webpackEnv) {
             net: 'empty',
             tls: 'empty',
             child_process: 'empty',
+            // I guess node crypto is bundled due to `mcl.js`, but in fact node crypto is not needed
+            crypto: 'empty'
         },
         performance: false,
+        externals: /jspdf.*/
     };
 };
