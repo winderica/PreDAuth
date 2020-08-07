@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: SourceSerifPro-Regular
+font link: https://fonts.google.com/specimen/Source+Serif+Pro
+font author: Frank Grießhammer
+font author site: http://www.frgr.de/
+
+
+icon designer: Jessica Coccimiglio
+icon designer link: /jessicaco
+        
+{"bg":"transparent","icon-gradient-0":"#0015D6","icon-gradient-1":"#0989FB","font":"#000000","slogan":"#141414"}
+      
