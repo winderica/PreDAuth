@@ -71,9 +71,12 @@ void (async () => {
         app.post('/decrypt/:token', (req, res) => {
             const token: string = req.params.token;
             const data: Record<string, { data: string; key: { cb0: string; cb1: string }; iv: string }> = req.body;
-            fakeDB[token] = Object.values(data)
+            const decrypted = Object.values(data)
                 .map(({ data, key, iv }) => JSON.parse(bob.reDecrypt(data, key, iv)) as Record<string, string>)
                 .reduce((i, j) => ({ ...i, ...j }), { id: v4() });
+            if (decrypted && decrypted.name && decrypted.avatar && decrypted.bio && decrypted.city && decrypted.id) {
+                fakeDB[token] = decrypted;
+            }
             res.sendStatus(200);
         });
 
