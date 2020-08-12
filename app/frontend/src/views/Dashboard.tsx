@@ -12,22 +12,19 @@ interface Data {
     id: string;
 }
 
-const isValid = (data: Data | null) => {
-    return Boolean(data && data.name && data.avatar && data.bio && data.city && data.id);
-};
-
 export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
     const [data, setData] = useState<Data | null>(null);
     const appInfo = useAppInfo();
     useEffect(() => {
         void (async () => {
             const { data } = await (await fetch(`${process.env.REACT_APP_APP_BACKEND}/data`, { credentials: 'include' })).json();
-            setData(data);
-            if (!isValid(data)) {
+            if (!data) {
                 if (!navigate) {
                     throw new Error('How could this happen?');
                 }
                 await navigate('/');
+            } else {
+                setData(data);
             }
         })();
     }, [navigate]);
@@ -44,7 +41,7 @@ export const Dashboard: FC<RouteComponentProps> = ({ navigate }) => {
         }))}`;
     };
     const classes = useStyles();
-    return data && isValid(data) ? (
+    return data ? (
         <div className={classes.root}>
             <Card elevation={10}>
                 <CardHeader title='Welcome' />
