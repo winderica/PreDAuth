@@ -20,9 +20,13 @@ export const Register = observer<FC<RouteComponentProps>>(({ navigate }) => {
     };
     const handleSubmit = () => apiWrapper(async () => {
         const key = await generateKey();
+        try {
+            await identityStore.setKey(key);
+        } catch {
+            throw new Error('您的浏览器不支持Web Crypto密钥对象的序列化，推荐使用Chromium内核的浏览器访问本服务');
+        }
         await api.register(id, key);
         await identityStore.setId(id);
-        await identityStore.setKey(key);
         if (componentStateStore.recovered) {
             const { dataKey, encrypted } = await encrypt(alice, userDataStore.dataArrayGroupedByTag);
             await api.setData(id, key, encrypted);
