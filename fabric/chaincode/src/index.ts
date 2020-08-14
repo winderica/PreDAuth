@@ -1,4 +1,7 @@
 import { PreDAuth } from './contracts';
-export { PreDAuth };
+import dotenv from 'dotenv';
 
-export const contracts = [ PreDAuth ];
+dotenv.config();
+
+export { PreDAuth };
+export const contracts = [PreDAuth];
