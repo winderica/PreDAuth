@@ -4,6 +4,7 @@
   "license": "MIT",
   "main": "./index.js",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "fabric-contract-api": "^2.2.0",
     "fabric-shim": "^2.2.0",
     "mcl": "file:./mcl",

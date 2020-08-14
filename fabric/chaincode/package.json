@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "fabric-contract-api": "^2.2.0",
     "mcl": "file:../../lib/mcl",
     "nodemailer": "^6.4.10"
@@ -16,6 +17,6 @@
     "typescript": "^3.9.6"
   },
   "scripts": {
-    "build": "tsc && cp package-dist.json dist/package.json && cp -r ../../lib/mcl/ dist/"
+    "build": "tsc && cp package-dist.json dist/package.json && cp .env dist/ && cp -r ../../lib/mcl/ dist/"
   }
 }
